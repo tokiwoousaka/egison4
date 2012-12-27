@@ -1,0 +1,88 @@
+(module base)
+
+(export-all)
+
+(define $Bool :: Type
+  (type BuiltinBool
+    {[,$val []
+      {[$tgt (if (and (or (not val) tgt) (or val (not tgt)))
+                 {[]}
+                 {})]}]
+     [<true> []
+      {[<true> {[]}]
+       [#t {[]}]
+       [_ {}]}]
+     [<false> []
+      {[<false> {[]}]
+       [#f {[]}]
+       [_ {}]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $or :: ([Bool Bool] : Bool)
+  (lambda [$b1 $b2]
+    (match b1 Bool
+      {[<true> #t]
+       [<false> b2]})))
+
+(define $and :: ([Bool Bool] : Bool)
+  (lambda [$b1 $b2]
+    (match b1 Bool
+      {[<true> b2]
+       [<false> #f]})))
+
+(define $not :: (Bool : Bool)
+  (lambda [$b]
+    (match b Bool
+      {[<true> #f]
+       [<false> #t]})))
+
+(define $Char :: Type
+  (type Char
+    {[,$c []
+      {[$tgt (if (eq-c? tgt c)
+                 {[]}
+                 {})]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $String :: Type
+  (type String
+    {[,$s []
+      {[$tgt (if (eq-s? tgt s)
+                 {[]}
+                 {})]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $Order :: Type
+  (type Order
+    {[,$val []
+      {[$tgt (if (eq? val tgt)
+                 {[]}
+                 {})]}]
+     [<less> []
+      {[<less> {[]}]
+       [_ {}]}]
+     [<equal> []
+      {[<equal> {[]}]
+       [_ {}]}]
+     [<greater> []
+      {[<greater> {[]}]
+       [_ {}]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $match? :: ([$a a] : Bool)
+  (lambda [$x $y]
+    (match x _
+      {[,y #t]
+       [_ #f]})))
+
+(define $= :: ([$a a] : Bool)
+  (lambda [$x $y]
+    (and (match? x y) (match? y x))))

@@ -1,0 +1,130 @@
+;;
+;; Base.egi
+;;
+
+(define $Integer :: Type
+  (type BuildinInteger
+    {
+     [,$n []
+      {[$tgt (if (eq-integer? tgt n)
+                 {[]}
+                 {})]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $compare :: ([Integer Integer] : Order)
+  (lambda [$m $n]
+    (if (lt? m n)
+        <less>
+        (if (eq? m n)
+            <equal>
+            <greater>))))
+
+(define $Float :: Type
+  (type :: Float
+    {[,$d []
+      {[$tgt (if (eq? tgt d)
+                 {[]}
+                 {})]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $Nat :: Type
+  (type Integer
+    {[,$n []
+      {[$tgt (if (eq? tgt n)
+                 {[]}
+                 {})]}]
+     [<o> []
+      {[0 {[]}]
+       [_ {}]}]
+     [<s _> Nat
+      {[$tgt (match (compare-integer tgt 0) Order
+               {[<greater> {(- tgt 1)}]
+                [_ {}]})]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]
+     }))
+
+(define $between :: ([Integer Integer] : {Integer})
+  (lambda [$m $n]
+    (match (compare-integer m n) Order
+      {[<less> {m @(between (+ m 1) n)}]
+       [<equal> {n}]
+       [<greater> {}]})))
+
+(define $min :: ({Integer} : Integer)
+  (lambda [$ns]
+    (match ns (List Integer)
+      {[<cons $n <nil>> n]
+       [<cons $n $rs>
+        (let {[$r (min rs)]}
+          (match (compare-integer n r) Order
+            {[<less> n]
+             [_ r]}))]})))
+
+(define $max :: ({Integer} : Integer)
+  (lambda [$ns]
+    (match ns (List Integer)
+      {[<cons $n <nil>> n]
+       [<cons $n $rs>
+        (let {[$r (max rs)]}
+          (match (compare-integer n r) Order
+            {[<greater> n]
+             [_ r]}))]})))
+
+(define $min-and-max :: ({Integer} : [Integer Integer])
+  (lambda [$ns]
+    (match ns (List Integer)
+      {[<cons $n <nil>> [n n]]
+       [<cons $n $rs>
+        (let {[[$min-n $max-n] (min-and-max rs)]}
+          (match (compare-integer n min-n) Order
+            {[<less> [n max-n]]
+             [_ (match (compare n max-n) Order
+                  {[<greater> [min-n n]]
+                   [_ [min-n max-n]]})]}))]})))
+
+(define $gcd :: ({Integer} : Integer)
+  (lambda [$ns]
+    (match ns (Set Integer)
+      {[<cons $n <nil>> n]
+       [<cons (& ,(min ns) $m)
+              $rs>
+        (gcd {m @((remove-all Integer)
+                    (map (lambda [$r] (mod r m))
+                         rs)
+                    0)})]})))
+
+(define $fib :: (Integer : Integer)
+  (lambda [$n]
+    (letrec {[$fib1 (lambda [$n $ret1 $ret2]
+                      (match n Nat
+                        {[<o> ret2]
+                         [<s <o>> ret1]
+                         [<s $n1> (fib1 (- n 1) (+ ret1 ret2) ret1)]
+                         }))]}
+      (fib1 n 1 1))))
+
+
+(define $fact :: (Integer : Integer)
+  (lambda [$n]
+    (letrec {[$fact1 (lambda [$n $ret]
+                       (match n [Nat]
+                         {[<o> ret]
+                          [<s $n1> (fact1 n1 (* n ret))]}))]}
+      (fact1 n 1))))
+
+(define $Mod :: (Type : Type)
+  (lambda [$m]
+    (type Integer
+      {[,$n []
+        {[$tgt (if (eq? (mod tgt m) (mod n m))
+                   {[]}
+                   {})]}]
+       [_ [Integer]
+	    {[$tgt {(mod tgt m)}]}]
+       })))
+

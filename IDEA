@@ -1,0 +1,69 @@
+;;;;; egison3
+
+;;; Type system
+
+;; Type Examples
+Something BuidinBool BuidinChar BuidinString BuidinInteger BuidinFloat
+(Type : Type)
+([Integer Integer] : Integer)
+([($a : $b) {a}] : {b})
+(Show $a) |- ({a} : String)
+
+(define $map :: ([($a : $b) {a}] : {b})
+  (lambda ...))
+
+(define $List :: (Type : Type)
+  (lambda [$a]
+    (type {a}
+      {...})))
+    
+(define $BTree :: (Type : Type)
+  (lambda [$a]
+    (algebraic-data-type (BTree a)
+      (|| <leaf a>
+          <node (BTree a) (NTree a)>))))
+
+(define $Integer :: Type
+  (type Integer
+    {[,$n []
+      {[$tgt (if (eq-integer? tgt n)
+                 {[]}
+                 {})]}]}))
+
+(define $Mod :: (Type : Type)
+  (lambda [$m]
+    (type Integer
+      {[,$n []
+        {[$tgt (if (eq? (mod tgt m) (mod n m))
+                   {[]}
+                   {})]}]
+       [_ [Integer]
+	    {[$tgt {(mod tgt m)}]}]
+       })))
+
+;; Class Example
+(define $Show :: (Type : Class)
+  (lambda [$a]
+    (class
+      {$show :: (a : String)
+       })))
+
+(instance (Show Integer) {[$show show_integer]})
+
+;;; Module system
+
+(module $json)
+
+(export {encode decode})
+
+(import json)
+
+;;; first class patterns
+
+I don't like macro.
+
+Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
+
+Two kinds of eval
+- Eval to a pattern ('`' in the value patterns also should be removed)
+- Eval for patterns

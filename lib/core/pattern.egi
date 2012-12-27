@@ -1,0 +1,19 @@
+(module pattern)
+
+(export-all)
+
+(define $n-cons :: ([Integer VarName] : Pattern)
+  (lambda [$n $v]
+    (loop $l $i (between 1 n) <cons $`v_i l> _)))
+
+(define $comb :: ([Integer VarName] : Pattern)
+  (lambda [$n $v]
+    (loop $l $i (between 1 n) <join _ <cons $`v_i l>> _)))
+
+(define $comb/double :: ([Integer VarName] : Pattern)
+  (lambda [$n $v]
+    (loop $l $i (between 1 n) <join _ (& <cons $`v_i _> l)> _)))
+
+(define $cloop :: ([Integer VarName] : Pattern)
+  (lambda [$n $v]
+    (loop $l $i (between 1 n) {`v_i @l} {})))
