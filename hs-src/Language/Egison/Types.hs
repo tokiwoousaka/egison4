@@ -59,7 +59,9 @@ data EgisonExpr =
   | LetExpr Bindings EgisonExpr
   | LetRecExpr RecursiveBindings EgisonExpr
 
-  | TypeExpr DestructInfoExpr
+  | TypeExpr TypeInfoExpr
+  | Class ClassInfoExpr
+
   | MatchExpr EgisonExpr EgisonExpr [MatchClause]
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause
 
@@ -105,7 +107,9 @@ type Bindings = [(EgisonExpr, EgisonExpr)]
 
 type RecursiveBindings = [(String, EgisonExpr)]
   
-type DestructInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, EgisonExpr)])]
+type TypeInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, EgisonExpr)])]
+
+type ClassInfoExpr = [(String, EgisonTypeExpr)]
 
 --
 -- Value
@@ -145,7 +149,7 @@ data EgisonVal =
   | InductiveData String [EgisonVal]
   | Tuple [EgisonVal]
   | Collection [EgisonVal]
-  | Type DestructInfo
+  | Type TypeInfo
   | Func ObjectRef EgisonExpr Env
   | PrimitiveFunc ([EgisonVal] -> ThrowsError EgisonVal)
   | IOFunc ([EgisonVal] -> IOThrowsError EgisonVal)
@@ -170,7 +174,7 @@ data InnerObject =
     IElement ObjectRef
   | ISubCollection ObjectRef
 
-type DestructInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitivePattern, EgisonExpr)])]
+type TypeInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitivePattern, EgisonExpr)])]
 
 --
 -- Internal Data
