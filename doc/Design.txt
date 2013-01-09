@@ -60,10 +60,23 @@ Something BuidinBool BuidinChar BuidinString BuidinInteger BuidinFloat
 
 ;;; first class patterns
 
-I don't like macro.
-
 Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
+
+(define $shuntsu :: ([Variable Pattern] : Pattern)
+  (lambda [$s $pat]
+    <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
+
+(define $test-pat :: ([Variable Integer] : Pattern)
+  (lambda [$s $n]
+    <cons $`s <cons ,(+ `s (+ 1 n)) _>>))
 
 Two kinds of eval
 - Eval to a pattern ('`' in the value patterns also should be removed)
 - Eval for patterns
+
+(test-pat %x 10)
+'Eval to a pattern' process -> <cons $x <cons ,(+ x (+ 1 10)) _>>
+
+Variables in a value pattern should be evaluated in 'Eval to a pattern' process.
+But, expressions in a value pattern should not be evaluated in 'Eval to a pattern' process.
+*** '(+ 1 10)' won't evaluated in 'Eval to a pattern' process.
