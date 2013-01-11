@@ -3,11 +3,14 @@ module Language.Egison.Types where
 
 import qualified Data.Map
 import Data.IORef
+import System.IO
+import Control.Monad.Error
+import Text.ParserCombinators.Parsec hiding (spaces)
 
 --
--- Expression
+-- Expressions
 --
-data TopExpr =
+data EgisonTopExpr =
     Define String EgisonExpr
   | Test EgisonExpr
   | Execute [String]
@@ -32,6 +35,7 @@ data EgisonTypeExpr =
 
   | PatVarTypeExpr String
   | VarTypeExpr String
+ deriving (Show)
         
 data EgisonType =
     CharType
@@ -50,6 +54,7 @@ data EgisonType =
 
   | PatVarType String
   | VarType String
+ deriving (Show)
         
 data EgisonExpr =
     CharExpr Char (Maybe EgisonTypeExpr)
@@ -166,6 +171,11 @@ data InnerExpr =
   | SubCollectionExpr EgisonExpr
  deriving (Show)
 
+data InnerTypedExpr =
+    ElementTypedExpr EgisonTypedExpr
+  | SubCollectionTypedExpr EgisonTypedExpr
+ deriving (Show)
+
 type Bindings = [(EgisonExpr, EgisonExpr)]
 
 type RecursiveBindings = [(String, EgisonExpr)]
@@ -175,7 +185,7 @@ type TypeInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, Egiso
 type ClassInfoExpr = [(String, EgisonTypeExpr)]
 
 --
--- Value
+-- Values
 --
 type ObjectRef = IORef Object
 
@@ -221,6 +231,10 @@ data EgisonVal =
   | Something
   | EOF
 
+data InnerObject =
+    IElement ObjectRef
+  | ISubCollection ObjectRef
+
 data Action =
     OpenInputPort String
   | OpenOutputPort String
@@ -228,15 +242,7 @@ data Action =
   | FlushPort String
   | ReadFromPort String String
   | WriteToPort String String
-
-data Args =
-    AVar String
-  | ATuple [Args]
  deriving (Show)
-  
-data InnerObject =
-    IElement ObjectRef
-  | ISubCollection ObjectRef
 
 type TypeInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitivePattern, EgisonExpr)])]
 type ClassInfo = [(String, EgisonType)]
@@ -273,3 +279,48 @@ data MAtom = MAtom {pClosure :: PClosure,
 data MState = MState {msFrame :: FrameList,
                       mAtoms :: [MAtom]
                       }
+
+---
+--- Types for Error Handling
+---
+data EgisonError =
+    Parser ParseError
+  | TypeMismatch EgisonExpr EgisonType
+  | NotImplemented String
+  | Default String
+
+showError :: EgisonError -> String
+showError (Parser parseErr) = "Parse error at " ++ ": " ++ show parseErr
+showError (TypeMismatch expr typ) = "Type error: The type of a expression '" ++ show expr ++ "' is expected to be '" ++ show typ ++ "'"
+showError (NotImplemented message) = "Not implemented: " ++ message
+showError (Default message) = "Error: " ++ message
+
+instance Show EgisonError where show = showError
+instance Error EgisonError where
+  noMsg = Default "An error has occurred"
+  strMsg = Default
+
+type ThrowsError = Either EgisonError
+
+trapError :: (MonadError e m, Show e) => m String -> m String
+trapError action = catchError action (return . show)
+
+extractValue :: ThrowsError a -> a
+extractValue (Right val) = val
+extractValue (Left _) = error "Unexpected error in extractValue; "
+
+type IOThrowsError = ErrorT EgisonError IO
+
+liftThrows :: ThrowsError a -> IOThrowsError a
+liftThrows (Left err) = throwError err
+liftThrows (Right val) = return val
+
+runIOThrowsREPL :: IOThrowsError String -> IO String
+runIOThrowsREPL action = runErrorT (trapError action) >>= return . extractValue
+
+runIOThrows :: IOThrowsError String -> IO (Maybe String)
+runIOThrows action = do
+    runState <- runErrorT action
+    case runState of
+        Left err -> return $ Just (show err)
+        Right _ -> return $ Nothing
