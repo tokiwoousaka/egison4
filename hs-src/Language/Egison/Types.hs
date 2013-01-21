@@ -45,7 +45,7 @@ data EgisonType =
   | FloatType
   | TypeType
   | ClassType
-  | PatternType
+  | PatternType EgisonType
 
   | TupleType [EgisonType]
   | CollectionType EgisonType
@@ -193,7 +193,7 @@ data Object =
     Closure Env EgisonExpr
   | Pattern EgisonPattern
   | Intermidiate EgisonIntermidiate
-  | Value EgisonVal
+  | Value EgisonValue
   
 data EgisonPattern =
     WildCard
@@ -212,21 +212,21 @@ data EgisonIntermidiate =
   | ITuple [ObjectRef]
   | ICollection [InnerObject]
 
-data EgisonVal =
+data EgisonValue =
     World [Action]
   | Char Char
   | String String
   | Bool Bool
   | Integer Integer
   | Float Double
-  | InductiveData String [EgisonVal]
-  | Tuple [EgisonVal]
-  | Collection [EgisonVal]
+  | InductiveData String [EgisonValue]
+  | Tuple [EgisonValue]
+  | Collection [EgisonValue]
   | Type TypeInfo
   | Class ClassInfo
   | Func ObjectRef EgisonExpr Env
-  | PrimitiveFunc ([EgisonVal] -> ThrowsError EgisonVal)
-  | IOFunc ([EgisonVal] -> IOThrowsError EgisonVal)
+  | PrimitiveFunc ([EgisonValue] -> ThrowsError EgisonValue)
+  | IOFunc ([EgisonValue] -> IOThrowsError EgisonValue)
   | Port String Handle
   | Something
   | EOF
