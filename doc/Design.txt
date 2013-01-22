@@ -7,12 +7,6 @@
 (define $add : ([Integer Integer] -> Intger)
   (lambda [$x $y] (+ x y)))
 
-(define $list : (Type -> Type)
-  (lambda [$a]
-    (type (Collection a)
-       ...
-       )))
-
 (define $integer : Type
   (type Integer
     {[,$n []
@@ -33,6 +27,12 @@
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
+(define $list : (Type -> Type)
+  (lambda [$a]
+    (type (Collection (type-for a))
+       ...
+       )))
+
 (define $map : (lambda [$a $b] ([(a -> b) {a}] -> {b})) :: ([SomeType SomeType] -> SomeType)
   (lambda [$fn $ls]
     (match ls (list something)
@@ -49,16 +49,13 @@
 (test (remove (mod 13) {10 2 14} 1))
 
 (define-type $Tree
-  (lambda [$a] ;; ???
+  (type-lambda [$a]
     (|| <leaf a>
         <node (tree a) (tree a)>)))
 
 (define $tree : (Type -> Type)
   (lambda [$a]
-    (algebraic-data-type (Tree a)
-      (|| <leaf a>
-          <node (tree a) (tree a)>))))
-
+    (algebraic-data-type (Tree (type-for a)))))
 
 ;; Class Example
 
