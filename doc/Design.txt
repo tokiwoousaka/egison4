@@ -7,52 +7,57 @@
 (define $add : ([Integer Integer] -> Intger)
   (lambda [$x $y] (+ x y)))
 
-(define $List : (Type -> Type)
+(define $list : (Type -> Type)
   (lambda [$a]
     (type (Collection a)
        ...
        )))
 
-(define $Integer : Type
+(define $integer : Type
   (type Integer
     {[,$n []
-      {[$tgt (if (eq-integer? tgt n)
+      {[$tgt (if (= tgt n)
                  {[]}
                  {})]}]
-     [_ [Something]
+     [_ [something]
       {[$tgt {tgt}]}]}))
 
-(define $Mod : (Integer -> Type)
+(define $mod : (Integer -> Type)
   (lambda [$m]
     (type Integer
       {[,$n []
-        {[$tgt (if (eq? (mod tgt m) (mod n m))
+        {[$tgt (if (= (mod tgt m) (mod n m))
                    {[]}
                    {})]}]
-       [_ [Integer]
+       [_ [integer]
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
 (define $map : (lambda [$a $b] ([(a -> b) {a}] -> {b})) :: ([SomeType SomeType] -> SomeType)
   (lambda [$fn $ls]
-    (match ls (List Something)
+    (match ls (list something)
       {[<nil> {}]
        [<cons $x $xs> {(fn x) @(map fn xs)}]})))
 
 (define $remove : (lambda [$a] ([Type {a} a] -> {a})) :: (Match -> SomeType)
   (lambda [$typ $xs $x]
-    (match xs (List typ)
+    (match xs (list typ)
       {[<nil> {}]
        [<cons ,x $rs> rs]
        [<cons $y $rs> {y @(remove a rs x)}]})))
 
-(test (remove (Mod 13) {10 2 14} 1))
+(test (remove (mod 13) {10 2 14} 1))
 
-(define $BTree : (Type -> Type)
+(define-type $Tree
+  (lambda [$a] ;; ???
+    (|| <leaf a>
+        <node (tree a) (tree a)>)))
+
+(define $tree : (Type -> Type)
   (lambda [$a]
-    (algebraic-data-type (BTree a)
+    (algebraic-data-type (Tree a)
       (|| <leaf a>
-          <node (BTree a) (BTree a)>))))
+          <node (tree a) (tree a)>))))
 
 
 ;; Class Example
