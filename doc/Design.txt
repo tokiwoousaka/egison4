@@ -18,7 +18,9 @@
     {[,$n []
       {[$tgt (if (eq-integer? tgt n)
                  {[]}
-                 {})]}]}))
+                 {})]}]
+     [_ [Something]
+      {[$tgt {tgt}]}]}))
 
 (define $Mod : (Integer -> Type)
   (lambda [$m]
@@ -46,21 +48,21 @@
 
 (test (remove (Mod 13) {10 2 14} 1))
 
-(define $BTree :: (Type : Type)
+(define $BTree : (Type -> Type)
   (lambda [$a]
     (algebraic-data-type (BTree a)
       (|| <leaf a>
-          <node (BTree a) (NTree a)>))))
+          <node (BTree a) (BTree a)>))))
 
 
 ;; Class Example
 
 (define-class $Show
-  {[Integer {[$show show-integer]}
+  {[Integer {[$show show-integer]}]
    [String {[$show id]}]
    ...}))
 
-(extend-class Show Char {[$show show-char]})
+(extend-class Show [Char {[$show show-char]}])  
 
 (define $print : (lambda [$a] (a -> String)) :: (Show -> SomeType)
   (lambda [x] (++ (show x) "\n")))
