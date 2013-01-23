@@ -1,14 +1,29 @@
-;;;;; egison3
+;;;;;
+;;;;; Design of Egison3
+;;;;;
 
+;;;
 ;;; Type system
+;;;
 
+;;
 ;; Type Examples
-    
+;;
+
+;
+; Types are declared with ':' infix operator.
+;    
 (define $add : ([Integer Integer] -> Intger)
   (lambda [$x $y] (+ x y)))
 
-(define $integer : Type
-  (type Integer
+;
+; Data which defines how to pattern-match and whose type is "Matcher" is called `matcher'.
+; A mather is defined with a matcher expression.
+; A mather expression takes a type expression to get for what type to match and
+; primitive match clauses as a type expression of Egison2.
+;
+(define $integer : Matcher
+  (matcher Integer
     {[,$n []
       {[$tgt (if (= tgt n)
                  {[]}
@@ -16,9 +31,16 @@
      [_ [something]
       {[$tgt {tgt}]}]}))
 
-(define $mod : (Integer -> Type)
+;
+; Types and mathers have one-to-many relationships.
+; e.g.
+; Integer -> integer
+;         -> (mod 10)
+;         -> (mod 100)
+;
+(define $mod : (Integer -> Matcher)
   (lambda [$m]
-    (type Integer
+    (matcher Integer
       {[,$n []
         {[$tgt (if (= (mod tgt m) (mod n m))
                    {[]}
@@ -27,19 +49,67 @@
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
-(define $list : (Type -> Type)
+(define $list : (Matcher -> Matcher)
   (lambda [$a]
-    (type (Collection (type-for a))
-       ...
+    (matcher (Collection a)
+      {[,$val []
+        {[$tgt (match [val tgt] [(list a) (list a)]
+                 {[[<nil> <nil>] {[]}]
+                  [[<cons $x $xs> <cons ,x ,xs>] {[]}]
+                  [[_ _] {}]})]}]
+       [<nil> []
+        {[{} {[]}]
+         [_ {}]}]
+       [<cons _ _> [a (list a)]
+        {[{$x .$xs} {[x xs]}]
+         [_ {}]}]
+       [<snoc _ _> [a (list a)]
+        {[{.$xs $x} {[x xs]}]
+         [_ {}]}]
+       [<join ,$pxs _> [(list a)]
+        {[$tgt (letrec {[$helper (lambda [$pxs $tgt]
+                                   (match [pxs tgt] [(list a) (list a)]
+                                     {[[<nil> _] {tgt}]
+                                      [[<cons $x $xs> <cons ,x $ys>] (helper xs ys)]
+                                      [[_ _] {}]}))]}
+                 (helper pxs tgt))]}]
+       [<join _ _> [(list a) (list a)]
+	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
+				                   (match ys (list a)
+				                     {[<nil> {[xs {}]}]
+				                      [<cons $z $zs> {[xs ys] @(helper {@xs z} zs)}]}))]}
+		         (helper {} tgt))]}]
+       [<nioj ,$pxs _> [(list a)]
+        {[$tgt (match-all tgt (list a) [<join $ys ,pxs> ys])]}]
+       [<nioj _ _> [(list a) (list a)]
+	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
+				                   (match ys (list a)
+				                     {[<nil> {[{} xs]}]
+				                      [<cons $z $zs> {[ys xs] @(helper {@xs z} zs)}]}))]}
+		         (helper {} tgt))]}]
+       [_ [something]
+        {[$tgt {tgt}]}]
        )))
 
-(define $map : (lambda [$a $b] ([(a -> b) {a}] -> {b})) :: ([SomeType SomeType] -> SomeType)
+(define-type $Tree
+  (type-lambda [$a]
+    (|| <leaf a>
+        <node (Tree a) (Tree a)>)))
+
+(define $tree : (Matcher -> Matcher)
+  (lambda [$a]
+    (algebraic-data-type (Tree a))))
+
+;
+; Types of types are declared with '::' infix operator.
+;    
+(define $map : (lambda [$a $b] ([(a -> b) (Collection a)] -> (Collection b))) :: ([SomeType SomeType] -> SomeType)
   (lambda [$fn $ls]
     (match ls (list something)
       {[<nil> {}]
        [<cons $x $xs> {(fn x) @(map fn xs)}]})))
 
-(define $remove : (lambda [$a] ([Type {a} a] -> {a})) :: (Match -> SomeType)
+(define $remove : (lambda [$a] ([Matcher (Collection a) a] -> (Collection a))) :: (Match -> SomeType)
   (lambda [$typ $xs $x]
     (match xs (list typ)
       {[<nil> {}]
@@ -48,23 +118,19 @@
 
 (test (remove (mod 13) {10 2 14} 1))
 
-(define-type $Tree
-  (type-lambda [$a]
-    (|| <leaf a>
-        <node (Tree a) (Tree a)>)))
-
-(define $tree : (Type -> Type)
-  (lambda [$a]
-    (algebraic-data-type Tree [a])))
 
 ;; Class Example
 
 (define-class $Show
   {[Integer {[$show show-integer]}]
    [String {[$show id]}]
-   ...}))
+   ...})
 
-(extend-class Show [Char {[$show show-char]}])  
+;
+; I prepared an extend-class expression.
+; This is because there are cases to define a new type after we defined a class.
+;
+(extend-class Show [Char {[$show show-char]}])
 
 (define $print : (lambda [$a] (a -> String)) :: (Show -> SomeType)
   (lambda [x] (++ (show x) "\n")))
@@ -82,11 +148,11 @@
 
 Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
 
-(define $shuntsu : ([Variable (Pattern {Integer})] -> (Pattern {Integer}))
+(define $shuntsu : ([Variable (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
   (lambda [$s $pat]
     <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
 
-(define $test-pat : ([Variable Integer] -> (Pattern {Integer}))
+(define $test-pat : ([Variable Integer] -> (Pattern (Collection Integer)))
   (lambda [$s $n]
     <cons $`s <cons ,(+ `s (+ 1 n)) _>>))
 
