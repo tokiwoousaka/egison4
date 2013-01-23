@@ -51,11 +51,11 @@
 (define-type $Tree
   (type-lambda [$a]
     (|| <leaf a>
-        <node (tree a) (tree a)>)))
+        <node (Tree a) (Tree a)>)))
 
 (define $tree : (Type -> Type)
   (lambda [$a]
-    (algebraic-data-type (Tree (type-for a)))))
+    (algebraic-data-type Tree [a])))
 
 ;; Class Example
 
