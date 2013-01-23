@@ -118,8 +118,9 @@
 
 (test (remove (mod 13) {10 2 14} 1))
 
-
+;;
 ;; Class Example
+;;
 
 (define-class $Show
   {[Integer {[$show show-integer]}]
@@ -135,8 +136,13 @@
 (define $print : (lambda [$a] (a -> String)) :: (Show -> SomeType)
   (lambda [x] (++ (show x) "\n")))
 
-
+;;;
 ;;; Module system
+;;;
+
+;;
+;; Very simple module system, for now.
+;;
 
 (module $json)
 
@@ -144,25 +150,30 @@
 
 (import json)
 
-;;; first class patterns
+;;;
+;;; Evaluation of patterns -- First class patterns
+;;;
 
-Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
+;;
+;; Egison3 does not have macro as Egison2.
+;;
 
-(define $shuntsu : ([Variable (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
+;
+; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
+;
+(define $shuntsu : ([VarName (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
   (lambda [$s $pat]
     <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
 
-(define $test-pat : ([Variable Integer] -> (Pattern (Collection Integer)))
+(define $test-pat : ([VarName Integer] -> (Pattern (Collection Integer)))
   (lambda [$s $n]
-    <cons $`s <cons ,(+ `s (+ 1 n)) _>>))
+    ,(+ `s (+ 1 n))))
 
-Two kinds of eval
-- Eval to a pattern ('`' in the value patterns also should be removed)
-- Eval for patterns
-
-(test-pat %x 10)
-'Eval to a pattern' process -> <cons $x <cons ,(+ x (+ 1 10)) _>>
-
-Variables in a value pattern should be evaluated in 'Eval to a pattern' process.
-But, expressions in a value pattern should not be evaluated in 'Eval to a pattern' process.
-*** '(+ 1 10)' won't evaluated in 'Eval to a pattern' process.
+; Evaluation for patterns has three phase.
+; (test-pat %x 10)
+; 1. Create a value-pattern-closure.
+;    -> (ValuePatternClosure env (+ `%x (+ 1 n)))
+; 2. Expand `%var with the result in the middle of pattern matching
+;    -> (ValuePatternClosure env (+ 3 (+ 1 n)))
+; 3. Evaluate value-pattern-closure
+;    -> 14
