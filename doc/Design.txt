@@ -21,6 +21,7 @@
 ; A mather is defined with a matcher expression.
 ; A mather expression takes primitive-match-clauses as a type expression of Egison2.
 ; The type of matcher is "(Matcher <target-type>)".
+; "Matcher" is primitive-pattern-constructor as '->'.
 ;
 (define $integer : (Matcher Integer)
   (matcher
@@ -170,6 +171,7 @@
 
 ;
 ; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
+; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
 ;
 (define $shuntsu : ([VarName (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
   (lambda [$s $pat]
