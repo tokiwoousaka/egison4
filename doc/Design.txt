@@ -122,29 +122,29 @@
 ;; Class Example
 ;;
 
-(define-class $Show $a
+(define-class $Show [$a]
   {$show : (,a -> String)})
 
-(define-class $Eq $a
+(define-class $Eq [$a]
   {$= : ([,a ,a] -> Bool)})
 
-(define-class $Ord [$a $b]
+(define $Ord [$a $b]
   {$lt : ([,a ,b] -> String)
    $gt : ([,a ,b] -> String)
    $le : ([,a ,b] -> String)
    $ge : ([,a ,b] -> String)})
 
-(class-instance Show Char {[$show show-char]})
-(class-instance Show Integer {[$show show-integer]})
-(class-instance Show String {[$show id]})
+(instance Show Char {[$show show-char]})
+(instance Show Integer {[$show show-integer]})
+(instance Show String {[$show id]})
 
 (class-instance Ord [Integer Integer]
-  {[lt lt-i]
-   [gt gt-i]
-   [le lt-i]
-   [ge gt-i]})
+  {[$lt lt-i]
+   [$gt gt-i]
+   [$le lt-i]
+   [$ge gt-i]})
 
-(define $print : ($a :: Show -> String))
+(define $print : ($a :: Show -> String)
   (lambda [x] (++ (show x) "\n")))
 
 ;;;

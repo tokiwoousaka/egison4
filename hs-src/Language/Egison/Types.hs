@@ -12,6 +12,9 @@ import Text.ParserCombinators.Parsec hiding (spaces)
 --
 data EgisonTopExpr =
     Define String EgisonExpr
+  | DefineType String DefineTypeExpr
+  | DefineClass String DefineClassExpr
+  | Instance String [String] [(String, String)]
   | Test EgisonExpr
   | Execute [String]
     -- temprary : we will replace load to import and export
@@ -19,32 +22,6 @@ data EgisonTopExpr =
   | Load String
  deriving (Show)
 
-data EgisonTypeExpr =
-    CharTypeExpr
-  | StringTypeExpr
-  | BoolTypeExpr
-  | IntegerTypeExpr
-  | FloatTypeExpr
-  | VarNameTypeExpr
-    -- Type variable binded to some type
-  | VarTypeExpr String
-    -- _ -> _
-  | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
-    -- (Match _), (Pattern _)
-  | MatcherTypeExpr EgisonTypeExpr
-  | PatternTypeExpr EgisonTypeExpr
-    -- [_ _ ...], (Collection _)
-  | TupleTypeExpr [EgisonTypeExpr]
-  | CollectionTypeExpr EgisonTypeExpr
-    -- (FnType ArgType ...)
-  | AppTypeExpr EgisonTypeExpr EgisonTypeExpr
- deriving (Show)
-          
-data EgisonClassExpr =
-    SomeTypeClassExpr
-  | VarClassExpr String
-  | FunClassExpr EgisonClassExpr EgisonClassExpr
-        
 data EgisonExpr =
     CharExpr Char (Maybe EgisonTypeExpr)
   | StringExpr String (Maybe EgisonTypeExpr)
@@ -73,15 +50,15 @@ data EgisonExpr =
   | IfExpr EgisonExpr EgisonExpr EgisonExpr (Maybe EgisonTypeExpr)
   | LetExpr Bindings EgisonExpr (Maybe EgisonTypeExpr)
   | LetRecExpr RecursiveBindings EgisonExpr (Maybe EgisonTypeExpr)
-
-  | TypeExpr TypeInfoExpr (Maybe EgisonTypeExpr)
-  | ClassExpr ClassInfoExpr (Maybe EgisonTypeExpr)
+  | DoExpr Bindings EgisonExpr (Maybe EgisonTypeExpr)
 
   | MatchExpr EgisonExpr EgisonExpr [MatchClause] (Maybe EgisonTypeExpr)
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause (Maybe EgisonTypeExpr)
 
-  | LoopExpr String String EgisonExpr EgisonExpr EgisonExpr (Maybe EgisonTypeExpr)
-  | DoExpr Bindings EgisonExpr (Maybe EgisonTypeExpr)
+  | MatcherExpr TypeInfoExpr (Maybe EgisonTypeExpr)
+  
+  | ClassExpr ClassInfoExpr (Maybe EgisonTypeExpr)
+  | InstanceExpr ClassInfoExpr (Maybe EgisonTypeExpr)
 
   | ApplyExpr EgisonExpr EgisonExpr (Maybe EgisonTypeExpr)
 
@@ -89,6 +66,32 @@ data EgisonExpr =
   | UndefinedExpr (Maybe EgisonTypeExpr)
  deriving (Show)
 
+data EgisonTypeExpr =
+    CharTypeExpr
+  | StringTypeExpr
+  | BoolTypeExpr
+  | IntegerTypeExpr
+  | FloatTypeExpr
+  | VarNameTypeExpr
+    -- Type variable binded to some type
+  | VarTypeExpr String
+    -- _ -> _
+  | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
+    -- (Match _), (Pattern _)
+  | MatcherTypeExpr EgisonTypeExpr
+  | PatternTypeExpr EgisonTypeExpr
+    -- [_ _ ...], (Collection _)
+  | TupleTypeExpr [EgisonTypeExpr]
+  | CollectionTypeExpr EgisonTypeExpr
+    -- (FnType ArgType ...)
+  | AppTypeExpr EgisonTypeExpr EgisonTypeExpr
+ deriving (Show)
+          
+data EgisonClassExpr =
+    SomeTypeClassExpr
+  | VarClassExpr String
+  | FunClassExpr EgisonClassExpr EgisonClassExpr
+        
 data EgisonTypedExpr =
     CharTypedExpr Char EgisonType
   | StringTypedExpr String EgisonType
@@ -169,7 +172,7 @@ type Bindings = [(EgisonExpr, EgisonExpr)]
 
 type RecursiveBindings = [(String, EgisonExpr)]
   
-type TypeInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, EgisonExpr)])]
+type MatcherInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, EgisonExpr)])]
 
 type ClassInfoExpr = [(String, EgisonTypeExpr)]
 
@@ -230,7 +233,7 @@ data EgisonValue =
   | InductiveData String [EgisonValue]
   | Tuple [EgisonValue]
   | Collection [EgisonValue]
-  | Type TypeInfo
+  | Matcher MatcherInfo
   | Class ClassInfo
   | Func ObjectRef EgisonExpr Env
   | PrimitiveFunc ([EgisonValue] -> ThrowsError EgisonValue)
@@ -252,7 +255,7 @@ data Action =
   | WriteToPort String String
  deriving (Show)
 
-type TypeInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitivePattern, EgisonExpr)])]
+type MatcherInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitivePattern, EgisonExpr)])]
 type ClassInfo = [(String, EgisonType)]
 
 --
