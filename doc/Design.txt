@@ -19,11 +19,10 @@
 ;
 ; Data which defines how to pattern-match and whose type is "Matcher" is called `matcher'.
 ; A mather is defined with a matcher expression.
-; A mather expression takes a type expression to get the type to match and
-; primitive-match-clauses as a type expression of Egison2.
+; A mather expression takes primitive-match-clauses as a type expression of Egison2.
 ;
-(define $integer : Matcher
-  (matcher Integer
+(define $integer : (Matcher Integer)
+  (matcher
     {[,$n []
       {[$tgt (if (= tgt n)
                  {[]}
@@ -38,7 +37,7 @@
 ;         -> (mod 10)
 ;         -> (mod 100)
 ;
-(define $mod : (Integer -> Matcher)
+(define $mod : (Integer -> (Matcher Integer))
   (lambda [$m]
     (matcher Integer
       {[,$n []
@@ -49,9 +48,9 @@
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
-(define $list : (Matcher -> Matcher)
+(define $list : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
-    (matcher (Collection \a)
+    (matcher
       {[,$val []
         {[$tgt (match [val tgt] [(list a) (list a)]
                  {[[<nil> <nil>] {[]}]
@@ -108,7 +107,7 @@
       {[<nil> {}]
        [<cons $x $xs> {(fn x) @(map fn xs)}]})))
 
-(define $remove : ([Matcher (Collection $a) ,a] -> (Collection ,a))
+(define $remove : ([(Matcher $a) (Collection ,a) ,a] -> (Collection ,a))
   (lambda [$typ $xs $x]
     (match xs (list typ)
       {[<nil> {}]
