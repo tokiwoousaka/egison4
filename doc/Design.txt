@@ -123,16 +123,16 @@
 ;;
 
 (define-class $Show $a
-  {show : (,a -> String)})
+  {$show : (,a -> String)})
 
 (define-class $Eq $a
-  {show : ([,a ,a] -> String)})
+  {$= : ([,a ,a] -> Bool)})
 
 (define-class $Ord [$a $b]
-  {lt : ([,a ,b] -> String)
-   gt : ([,a ,b] -> String)
-   le : ([,a ,b] -> String)
-   ge : ([,a ,b] -> String)})
+  {$lt : ([,a ,b] -> String)
+   $gt : ([,a ,b] -> String)
+   $le : ([,a ,b] -> String)
+   $ge : ([,a ,b] -> String)})
 
 (class-instance Show Char {[$show show-char]})
 (class-instance Show Integer {[$show show-integer]})

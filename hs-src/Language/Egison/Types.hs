@@ -14,6 +14,7 @@ data EgisonTopExpr =
     Define String EgisonExpr
   | Test EgisonExpr
   | Execute [String]
+    -- temprary : we will replace load to import and export
   | LoadFile String
   | Load String
  deriving (Show)
@@ -24,37 +25,25 @@ data EgisonTypeExpr =
   | BoolTypeExpr
   | IntegerTypeExpr
   | FloatTypeExpr
-  | TypeTypeExpr
-  | ClassTypeExpr
-  | PatternTypeExpr
-
+  | VarNameTypeExpr
+    -- Type variable binded to some type
+  | VarTypeExpr String
+    -- _ -> _
+  | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
+    -- (Match _), (Pattern _)
+  | MatcherTypeExpr EgisonTypeExpr
+  | PatternTypeExpr EgisonTypeExpr
+    -- [_ _ ...], (Collection _)
   | TupleTypeExpr [EgisonTypeExpr]
   | CollectionTypeExpr EgisonTypeExpr
-  | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
+    -- (FnType ArgType ...)
   | AppTypeExpr EgisonTypeExpr EgisonTypeExpr
-
-  | PatVarTypeExpr String
-  | VarTypeExpr String
  deriving (Show)
-        
-data EgisonType =
-    CharType
-  | StringType
-  | BoolType
-  | IntegerType
-  | FloatType
-  | TypeType
-  | ClassType
-  | PatternType EgisonType
-
-  | TupleType [EgisonType]
-  | CollectionType EgisonType
-  | FunType EgisonType EgisonType
-  | AppType EgisonType EgisonType
-
-  | PatVarType String
-  | VarType String
- deriving (Show)
+          
+data EgisonClassExpr =
+    SomeTypeClassExpr
+  | VarClassExpr String
+  | FunClassExpr EgisonClassExpr EgisonClassExpr
         
 data EgisonExpr =
     CharExpr Char (Maybe EgisonTypeExpr)
@@ -195,6 +184,25 @@ data Object =
   | Intermidiate EgisonIntermidiate
   | Value EgisonValue
   
+data EgisonType =
+    CharType
+  | StringType
+  | BoolType
+  | IntegerType
+  | FloatType
+  | TypeType
+  | ClassType
+  | PatternType EgisonType
+
+  | TupleType [EgisonType]
+  | CollectionType EgisonType
+  | FunType EgisonType EgisonType
+  | AppType EgisonType EgisonType
+
+  | PatVarType String
+  | VarType String
+ deriving (Show)
+        
 data EgisonPattern =
     WildCard
   | PatVar String [Integer]
