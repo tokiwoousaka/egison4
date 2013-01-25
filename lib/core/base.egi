@@ -2,24 +2,6 @@
 
 (export-all)
 
-(define $bool : Type
-  (type Bool
-    {[,$val []
-      {[$tgt (if (and (or (not val) tgt) (or val (not tgt)))
-                 {[]}
-                 {})]}]
-     [<true> []
-      {[<true> {[]}]
-       [#t {[]}]
-       [_ {}]}]
-     [<false> []
-      {[<false> {[]}]
-       [#f {[]}]
-       [_ {}]}]
-     [_ [Something]
-      {[$tgt {tgt}]}]
-     }))
-
 (define $or : ([Bool Bool] -> Bool)
   (lambda [$b1 $b2]
     (match b1 bool

@@ -30,7 +30,7 @@ data EgisonExpr =
   | FloatExpr Double (Maybe EgisonTypeExpr)
   | PatVarExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
   | VarExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
-  | SymbolExpr String (Maybe EgisonTypeExpr)
+  | VarNameExpr String (Maybe EgisonTypeExpr)
   | PatVarOmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
   | VarOmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
 
@@ -55,7 +55,7 @@ data EgisonExpr =
   | MatchExpr EgisonExpr EgisonExpr [MatchClause] (Maybe EgisonTypeExpr)
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause (Maybe EgisonTypeExpr)
 
-  | MatcherExpr TypeInfoExpr (Maybe EgisonTypeExpr)
+  | MatcherExpr MatcherInfoExpr (Maybe EgisonTypeExpr)
   
   | ClassExpr ClassInfoExpr (Maybe EgisonTypeExpr)
   | InstanceExpr ClassInfoExpr (Maybe EgisonTypeExpr)

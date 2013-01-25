@@ -2,111 +2,111 @@
 ;; Collection.egi
 ;;
 
-(define $List :: (Type : Type)
+(define $list : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
-    (type {a}
+    (matcher
       {[,$val []
-        {[$tgt (match [val tgt] [(List a) (List a)]
+        {[$tgt (match [val tgt] [(list a) (list a)]
                  {[[<nil> <nil>] {[]}]
                   [[<cons $x $xs> <cons ,x ,xs>] {[]}]
                   [[_ _] {}]})]}]
        [<nil> []
         {[{} {[]}]
          [_ {}]}]
-       [<cons _ _> [a (List a)]
+       [<cons _ _> [a (list a)]
         {[{$x .$xs} {[x xs]}]
          [_ {}]}]
-       [<snoc _ _> [a (List a)]
+       [<snoc _ _> [a (list a)]
         {[{.$xs $x} {[x xs]}]
          [_ {}]}]
-       [<join ,$pxs _> [(List a)]
+       [<join ,$pxs _> [(list a)]
         {[$tgt (letrec {[$helper (lambda [$pxs $tgt]
-                                   (match [pxs tgt] [(List a) (List a)]
+                                   (match [pxs tgt] [(list a) (list a)]
                                      {[[<nil> _] {tgt}]
                                       [[<cons $x $xs> <cons ,x $ys>] (helper xs ys)]
                                       [[_ _] {}]}))]}
                  (helper pxs tgt))]}]
-       [<join _ _> [(List a) (List a)]
+       [<join _ _> [(list a) (list a)]
 	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
-				                   (match ys (List a)
+				                   (match ys (list a)
 				                     {[<nil> {[xs {}]}]
 				                      [<cons $z $zs> {[xs ys] @(helper {@xs z} zs)}]}))]}
 		         (helper {} tgt))]}]
-       [<nioj ,$pxs _> [(List a)]
-        {[$tgt (match-all tgt (List a) [<join $ys ,pxs> ys])]}]
-       [<nioj _ _> [(List a) (List a)]
+       [<nioj ,$pxs _> [(list a)]
+        {[$tgt (match-all tgt (list a) [<join $ys ,pxs> ys])]}]
+       [<nioj _ _> [(list a) (list a)]
 	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
-				                   (match ys (List a)
+				                   (match ys (list a)
 				                     {[<nil> {[{} xs]}]
 				                      [<cons $z $zs> {[ys xs] @(helper {@xs z} zs)}]}))]}
 		         (helper {} tgt))]}]
-       [_ [Something]
+       [_ [something]
         {[$tgt {tgt}]}]
        })))
 
-(define $map :: ([($a : $b) {a}] : {b})
+(define $map
   (lambda [$fn $ls]
-    (match ls (List Something)
+    (match ls (list something)
       {[<nil> {}]
        [<cons $x $xs> {(fn x) @(map fn xs)}]})))
 
-(define $map-and-concat :: ([($a : $b) {a}] : {b})
+(define $map-and-concat
   (lambda [$fn $ls]
-    (match ls (List Something)
+    (match ls (list something)
       {[<nil> {}]
        [<cons $x $xs> {@(fn x) @(map-and-concat fn xs)}]})))
 
-(define $foldr :: ([([$a {a}] : a) {a} {a}] : {a})
+(define $foldr
   (lambda [$fn $init $ls]
-    (match ls (List Something)
+    (match ls (list something)
       {[<nil> init]
        [<cons $x $xs> (fn x (foldr fn init xs))]})))
 
-(define $foldl :: ([([$a {a}] : a) {a} {a}] : {a})
+(define $foldl
   (lambda [$fn $init $ls]
-    (match ls (List Something)
+    (match ls (list something)
       {[<nil> init]
        [<cons $x $xs> (let {[$y (fn init x)]}
                         (foldl fn y xs))]})))
 
-(define $filter :: ([($a : a) {$a}] : {a})
+(define $filter
   (lambda [$pred $ls]
-    (match ls (List Something)
+    (match ls (list something)
       {[<nil> {}]
        [<cons $x $xs>
         (if (pred x)
             {x @(filter pred xs)}
             (filter pred xs))]})))
 
-(define $remove :: ([{$a} a] : {a})
+(define $remove
   (lambda [$xs $x]
-    (match xs (List _)
+    (match xs (list _)
       {[<nil> {}]
        [<cons ,x $rs> rs]
        [<cons $y $rs> {y @(remove a rs x)}]})))
 
-(define $remove-all :: ([{$a} a] : {a})
+(define $remove-all
   (lambda [$xs $x]
-    (match xs (List _)
+    (match xs (list _)
       {[<nil> {}]
        [<cons ,x $rs> (remove-all rs x)]
        [<cons $y $rs> {y @(remove-all rs x)}]})))
 
-(define $remove-collection :: ([{$a} a] : {a})
+(define $remove-collection
   (lambda [$xs $ys]
-    (match ys (List _)
+    (match ys (list _)
       {[<nil> xs]
        [<cons $y $rs> ((remove-collection a) ((remove a) xs y) rs)]})))
 
-(define $add :: ([{$a} a] : {a})
+(define $add
   (lambda [$xs $x]
     (if (member? x xs)
         xs
         {@xs x})))
 
-(define $union :: ([{$a} {a}] : {a})
+(define $union
   (lambda [$xs $ys]
-    (match ys (List _)
+    (match ys (list _)
       {[<nil> xs]
        [<cons $y $rs> ((union a) ((add a) xs y) rs)]})))
 
@@ -114,13 +114,13 @@
   (lambda [$xs]
     (letrec {[$remove-and-count
               (lambda [$x $xs]
-		        (match xs (List _)
+		        (match xs (list _)
 			      {[<nil> [{} 1]]
 			       [<cons ,x $ys> (let {[[$r $i] (remove-and-count x ys)]}
 					                [r (+ i 1)])]
 			       [<cons $y $ys> (let {[[$r $i] (remove-and-count x ys)]}
 					                [{y @r} i])]}))]}
-	  (match xs (List Something)
+	  (match xs (list something)
 	    {[<nil> {}]
 	     [<cons $x $ys> (let {[[$rs $i] (remove-and-count x ys)]}
 			              {[x i] @(occurrence rs)})]}))))
@@ -130,7 +130,7 @@
     (foldr (lambda [$x $rs]
 	         (let {[[$y $i] x]} 
 		       (map-and-concat (lambda [$sub] 
-			                     (match-all (loop $l $j (between 1 i) {y @l} {}) (List _)
+			                     (match-all (loop $l $j (between 1 i) {y @l} {}) (list _)
                                    [<join $ys _> {@ys @sub}]))
 			                   rs)))
 	       {{}}
@@ -138,43 +138,43 @@
 
 (define $size
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<nil> 0]
        [<cons _ $rs> (+ 1 (size rs))]})))
 
 (define $car
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<cons $x _> x]})))
 
 (define $cdr
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<cons _ $ys> ys]})))
 
 (define $rac
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<snoc $x _> x]})))
 
 (define $rdc
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<snoc _ $ys> ys]})))
 
 (define $nth (lambda [$i $l]
-               (match l (List Something) {[<cons $x $xs> (if (eq? i 0) x (nth (- i 1) xs))]})))
+               (match l (list something) {[<cons $x $xs> (if (eq? i 0) x (nth (- i 1) xs))]})))
 
 (define $reverse
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<nil> {}]
        [<cons $x $rs>
         {@(reverse rs) x}]})))
 
 (define $member?
   (lambda [$x $ys]
-    (match ys (List _)
+    (match ys (list _)
       {[<nil> #f]
        [<cons ,x $ys> #t]
        [<cons $y $ys> ((member? a) x ys)]})))
@@ -183,7 +183,7 @@
   (lambda [$xs]
     (letrec {[$loop-fn
               (lambda [$xs $ys]
-                (match xs (List _)
+                (match xs (list _)
                   {[<nil> ys]
                    [<cons $x $rs>
                     (if (member? x ys)
@@ -193,7 +193,7 @@
 
 (define $subcollection?
   (lambda [$xs $ys]
-    (match xs (List _)
+    (match xs (list _)
       {[<nil> #t]
        [<cons $x $rest>
         (if (member? x ys)
@@ -202,42 +202,42 @@
 
 (define $concat
   (lambda [$xs]
-    (match xs (List Something)
+    (match xs (list something)
       {[<nil> {}]
        [<cons $x $rs> {@x @(concat rs)}]})))
 
-(define $Multiset :: (Type : Type)
+(define $multiset : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
-    (type {a}
+    (matcher
       {[,$val []
-        {[$tgt (match [val tgt] [(List a) (Multiset a)]
+        {[$tgt (match [val tgt] [(list a) (multiset a)]
                  {[[<nil> <nil>] {[]}]
 		          [[<cons $x $xs> <cons ,x ,xs>] {[]}]
 		          [[_ _] {}]})]}]
        [<nil> []
         {[{} {[]}]
          [_ {}]}]
-       [<cons ,$px _> [(Multiset a)]
+       [<cons ,$px _> [(multiset a)]
         {[$tgt (if (member? px tgt)
 		           {(remove tgt px)}
 		           {})]}]
-       [<cons _ _> [a (Multiset a)]
+       [<cons _ _> [a (multiset a)]
         {[$tgt (letrec {[$helper (lambda [$xs $ys]
-				                   (match ys (List a)
+				                   (match ys (list a)
 				                     {[<nil> {}]
 				                      [<cons $z $zs> (if (member? z xs)
 							                             (helper {@xs z} zs)
 							                             {[z {@xs @zs}] @(helper {@xs z} zs)})]}))]}
 		         (helper {} tgt))]}]
-       [<join ,$pxs _> [(Multiset a)]
+       [<join ,$pxs _> [(multiset a)]
         {[$tgt (letrec {[$helper (lambda [$xs $ys]
-				                   (match xs (List Something)
+				                   (match xs (list something)
 				                     {[<nil> ys]
 				                      [<cons $z $zs> (if (member? z ys)
 							                             (helper zs (remove ys z))
 							                             {})]}))]}
 		         {(helper pxs tgt)})]}]
-       [<join _ _> [(Multiset a) (Multiset a)]
+       [<join _ _> [(multiset a) (multiset a)]
 	    {[$tgt
 	      (foldr
 		         (lambda [$xi $xs]
@@ -246,17 +246,17 @@
 				                 (lambda [$sub] 
 				                   (do {[[$ys $zs] sub]
 					                    [$zs ((remove-all a) zs x)]}
-				                     (match-all (loop $l $j (between 1 i) {x @l} {}) (List a) [<join $us $vs> [{@us @ys} {@zs @vs}]])))
+				                     (match-all (loop $l $j (between 1 i) {x @l} {}) (list a) [<join $us $vs> [{@us @ys} {@zs @vs}]])))
 				                 xs)))
 		         {[{} tgt]}
 		         ((occurrence a) tgt))]}]
-       [_ [Something]
+       [_ [something]
         {[$tgt {tgt}]}]
        })))
 
-(define $Set :: (Type : Type)
+(define $set : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
-    (type {a}
+    (matcher
       {[,$val []
         {[$tgt (if (= (unique val) (unique tgt))
                    {[]}
@@ -264,26 +264,26 @@
        [<nil> []
         {[{} {[]}]
          [_ {}]}]
-       [<cons ,$px _> [(Set2 a)]
+       [<cons ,$px _> [(set2 a)]
         {[$tgt (let {[$tgt2 (unique tgt)]}
                  (if (member? px tgt)
 		     {tgt}
 		     {}))]}]
-       [<cons _ _> [a (Set2 a)]
+       [<cons _ _> [a (set2 a)]
         {[$tgt (let {[$tgt2 (unique tgt)]}
-                 (match-all tgt2 (Multiset a)
+                 (match-all tgt2 (multiset a)
                    [<cons $x _> [x tgt2]]))]}]
-       [<join _ _> [(Set2 a) (Set2 a)]
+       [<join _ _> [(set2 a) (set2 a)]
         {[$tgt (let {[$tgt2 (unique tgt)]}
-                 (match-all tgt2 (Multiset a)
+                 (match-all tgt2 (multiset a)
                    [<join $xs _> [xs tgt2]]))]}]
-       [_ [Something]
+       [_ [something]
         {[$tgt {tgt}]}]
        })))
 
-(define $Set2 :: (Type : Type)
+(define $set2
   (lambda [$a]
-    (type {a}
+    (matcher
       {[,$val []
         {[$tgt (if (= (unique val) tgt)
                    {[]}
@@ -291,16 +291,16 @@
        [<nil> []
         {[{} {[]}]
          [_ {}]}]
-       [<cons ,$px _> [(Set a)]
+       [<cons ,$px _> [(set a)]
         {[$tgt (if (member? px tgt)
 		   {tgt}
 		   {})]}]
-       [<cons _ _> [a (Set a)]
-        {[$tgt (match-all tgt (Multiset a)
+       [<cons _ _> [a (set a)]
+        {[$tgt (match-all tgt (multiset a)
                  [<cons $x _> [x tgt]])]}]
-       [<join _ _> [(Set a) (Set a)]
-        {[$tgt (match-all tgt (Multiset a)
+       [<join _ _> [(set a) (set a)]
+        {[$tgt (match-all tgt (multiset a)
                  [<join $xs _> [xs tgt]])]}]
-       [_ [Something]
+       [_ [something]
         {[$tgt {tgt}]}]
        })))

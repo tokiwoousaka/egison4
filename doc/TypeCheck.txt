@@ -6,7 +6,7 @@ Calculate the types for the arguments of each pattern constructor of each type d
 
 e.g.
 
-(Multiset a)
+(multiset a)
 ---
 <nil>
 <cons a {a}>
@@ -27,15 +27,15 @@ Unification
 
 Unify types
 
-($a : a) and ($b : b)
+($a -> ,a) and ($b -> ,b)
 rewrited to
-($1 : 1) and ($1 : 1)
+($1 -> ,1) and ($1 -> ,1)
 
 Unify '$a' and '$b', then  all 'b' of the second type expression are rewrited to 'a'.
 
-($a : a) and (Integer : Integer)
+($a -> ,a) and (Integer -> Integer)
 rewrited to
-($1 : 1) and (Integer : Integer)
+($1 -> ,1) and (Integer -> Integer)
 
 Unify '$a' and 'Integer', then [$1 Integer] is added to TypeVar environment.
 
