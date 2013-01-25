@@ -138,7 +138,7 @@
 (instance Show Integer {[$show show-integer]})
 (instance Show String {[$show id]})
 
-(class-instance Ord [Integer Integer]
+(instance Ord [Integer Integer]
   {[$lt lt-i]
    [$gt gt-i]
    [$le lt-i]
