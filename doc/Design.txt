@@ -128,7 +128,7 @@
 (define-class $Eq [$a]
   {$= : ([,a ,a] -> Bool)})
 
-(define $Ord [$a $b]
+(define-class $Ord [$a $b]
   {$lt : ([,a ,b] -> String)
    $gt : ([,a ,b] -> String)
    $le : ([,a ,b] -> String)
