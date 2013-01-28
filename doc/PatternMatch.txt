@@ -1,0 +1,29 @@
+;;;;;
+;;;;; Pattern Matching
+;;;;;
+
+;;;
+;;; pattern examples
+;;;
+
+(define $seq-pat : ([VarName (Pattern $a)] -> (Pattern a))
+  (lambda [$name $pat]
+    (seq-pat-helper name pat 1)))
+
+(define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
+  (lambda [$name $pat $i]
+    <cons ,(+ `name i) (| (seq-pat-helper name (+ i 1)) (&& ^(seq-pat-helper name (+ i 1)) pat>))>))
+
+;
+; '|.' is a new pattern operator from Egison3.
+; With this operator, we can write "seq-pat-helper' as bellow.
+;
+
+(define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
+  (lambda [$name $pat $i]
+    <cons ,(+ `name i) (|. (seq-pat-helper name (+ i 1)) pat)>))
+
+
+;;;
+;;; pattern matching mechanism
+;;;
