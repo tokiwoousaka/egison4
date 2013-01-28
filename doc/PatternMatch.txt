@@ -3,7 +3,7 @@
 ;;;;;
 
 ;;;
-;;; pattern examples
+;;; Pattern examples
 ;;;
 
 (define $seq-pat : ([VarName (Pattern $a)] -> (Pattern a))
@@ -25,5 +25,64 @@
 
 
 ;;;
-;;; pattern matching mechanism
+;;; Pattern matching mechanism
+;;; -- First class patterns
 ;;;
+
+;;
+;; Egison3 does not have macro as Egison2.
+;;
+
+;
+; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
+; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
+;
+(define $shuntsu : ([VarName (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
+  (lambda [$s $pat]
+    <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
+
+(define $test-pat : ([VarName Integer] -> (Pattern (Collection Integer)))
+  (lambda [$s $n]
+    ,(+ `s (+ 1 n))))
+
+; Evaluation for patterns has three phase.
+; (test-pat %x 10)
+; 1. Create a value-pattern-closure.
+;    -> (ValuePatternClosure env (+ `%x (+ 1 n)))
+; 2. Expand `%var with the result in the middle of pattern matching
+;    -> (ValuePatternClosure env (+ 3 (+ 1 n)))
+; 3. Evaluate value-pattern-closure
+;    -> 14
+
+patternMatch :: Environment -> [MatchState] -> IOThrowsError [MatchResult]
+patternMatch _ _ [] = return []
+patternMatch MatchOne env ((frame, []):_) = do
+  return [frame]
+patternMatch MatchAll env ((frame, []):mStates) = do
+  ret <- patternMatch env mAtoms
+  return (frame:ret)
+patternMatch mFlag env ((frame, ((matcher,pattern,target):mAtoms)):mStates) = do
+  rets <- patternMatchCore MatchAll env (frame, (matcher, pattern, target))
+  patternMatch mFlag env ((map (\ret -> (ret, mAtoms)) rets) ++ mStates)
+
+patternMatchCore :: Environment -> MatchResult -> EgisonObject -> EgisonObject -> EgisonObject -> IOThrowsError [MatchResult]
+patternMatchCore env frame matcher pattern target =
+  patternVal <- eval1 pattern
+  case patternVal of
+    (ValuePattern env expr) ->
+       
+evalValuePat env expr frame =
+evalValuePat env (OmitExpr name nums) frame =
+  case getValue env (name, nums) of
+    (VarName name nums) -> cEval (getValueFromFrame frame (name, nums))
+    _ -> throwError "..."
+evalValuePat env expr frame = do
+  val <- eval1 env expr
+  evalValuePatRecursively env val frame
+  
+
+MatchFlag = MatchAll |  MatchOne
+
+MatchState = [(MatchResult, [MatchAtom])]
+
+MatchAtom = (Matcher, Pattern, Target)
