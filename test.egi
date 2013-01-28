@@ -1,0 +1,4 @@
+(define $compress : ((Collection Integer) -> (Collection [Integer Integer]))
+  (lambda [$ns]
+    (match ns (list integer)
+      {[<cons $n <cons ,n $rs>>

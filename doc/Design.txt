@@ -177,35 +177,6 @@
 (import json)
 
 ;;;
-;;; Evaluation of patterns -- First class patterns
-;;;
-
-;;
-;; Egison3 does not have macro as Egison2.
-;;
-
-;
-; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
-; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
-;
-(define $shuntsu : ([VarName (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
-  (lambda [$s $pat]
-    <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
-
-(define $test-pat : ([VarName Integer] -> (Pattern (Collection Integer)))
-  (lambda [$s $n]
-    ,(+ `s (+ 1 n))))
-
-; Evaluation for patterns has three phase.
-; (test-pat %x 10)
-; 1. Create a value-pattern-closure.
-;    -> (ValuePatternClosure env (+ `%x (+ 1 n)))
-; 2. Expand `%var with the result in the middle of pattern matching
-;    -> (ValuePatternClosure env (+ 3 (+ 1 n)))
-; 3. Evaluate value-pattern-closure
-;    -> 14
-
-;;;
 ;;; Buildins
 ;;;
 

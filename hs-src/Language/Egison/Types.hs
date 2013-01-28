@@ -209,8 +209,8 @@ data EgisonType =
 data EgisonPattern =
     WildCard
   | PatVar String [Integer]
-  | ValuePat EgisonExpr
-  | PredPat EgisonExpr [EgisonExpr]
+  | ValuePat Environment EgisonExpr
+  | PredPat Environment EgisonExpr [EgisonExpr]
   | CutPat EgisonPattern
   | NotPat EgisonPattern
   | AndPat [EgisonPattern]

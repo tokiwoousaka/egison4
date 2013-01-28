@@ -2,7 +2,7 @@
 
 (export-all)
 
-(define $n-cons :: ([Integer Variable] : Pattern)
+(define $n-cons : ([Integer Variable] : Pattern)
   (lambda [$n $v]
     (loop $l $i (between 1 n) <cons $`v_i l> _)))
 
