@@ -26,8 +26,12 @@
 ;
 (define $integer : (Matcher Integer)
   (matcher
-    {[_ [something]
-     {[$tgt {tgt}]}]}))
+    {[,$val []
+      {[$tgt (if (eq? val tgt)
+                 {[]}
+                 {})]}]
+     [$ [something]
+      {[$tgt {tgt}]}]}))
 
 ;
 ; Types and mathers have one-to-many relationships.
@@ -38,43 +42,44 @@
 ;
 (define $mod : (Integer -> (Matcher Integer))
   (lambda [$m]
-    (matcher Integer
-      {[_ [integer]
+    (matcher
+      {[,$val []
+	    {[$tgt (if (eq? (mod val m) (mod tgt m))
+                   {[]}
+                   {})]}]
+       [_ [integer]
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
-(define $eq?
+(define $equal?
   (lambda [$matcher]
-    (lambda [$xs $ys]
-      (match [xs ys] [matcher matcher]
-        {[[<nil> <nil>] #t]
-         [[<cons $x $xs2> <cons (? eq? [x $]) (? eq? [xs2 $])>] #t]
-         [_ #f]}))))
-
-;
-; A value pattern is a syntax sugar.
-; e.g. ,x => (? eq? [x $])
-;
+    (function [matcher matcher]
+      {[[$zs ,zs] #t]
+       [_ #f]})))
 
 (define $list : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher
-      {[<nil> []
+      {[,$val []
+        {[$tgt (if ((equal-list? a) val tgt)
+                   {[]}
+                   {})]}]
+       [<nil> []
         {[{} {[]}]
          [_ {}]}]
-       [<cons _ _> [a (list a)]
+       [<cons $ $> [a (list a)]
         {[{$x .$xs} {[x xs]}]
          [_ {}]}]
-       [<snoc _ _> [a (list a)]
+       [<snoc $ $> [a (list a)]
         {[{.$xs $x} {[x xs]}]
          [_ {}]}]
-       [<join ,$pxs _> [(list a)]
-        {[$tgt (letrec {[$helper (lambda [$pxs $tgt]
-                                   (match [pxs tgt] [(list a) (list a)]
-                                     {[[<nil> _] {tgt}]
-                                      [[<cons $x $xs> <cons ,x $ys>] (helper xs ys)]
+       [<join ,$hs $> [(list a)]
+        {[$tgt (letrec {[$helper (lambda [$xs $ys]
+                                   (match [xs ys] [(list a) (list a)]
+                                     {[[<nil> _] {ys}]
+                                      [[<cons $x $xs2> <cons ,x $ys2>] (helper xs2 ys2)]
                                       [[_ _] {}]}))]}
-                 (helper pxs tgt))]}]
+                 (helper hs tgt))]}]
        [<join _ _> [(list a) (list a)]
 	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
 				                   (match ys (list a)
@@ -91,7 +96,41 @@
 		         (helper {} tgt))]}]
        [_ [something]
         {[$tgt {tgt}]}]
-       )))
+       ))))
+
+(define $multiset : ((Matcher $a) -> (Matcher (Collection ,a)))
+  (lambda [$a]
+    (matcher
+      {[,$val []
+        {[$tgt (if ((equal-multiset? a) val tgt)
+                   {[]}
+                   {})]}]
+       [<nil> []
+        {[{} {[]}]
+         [_ {}]}]
+       [<cons $ $> [a (multiset a)]
+        [$tgt (match-all tgt (list a)
+                [<join $hs <cons $x $ts>> [x {@hs @ts}]])]]
+       [<join ,$xs $> [(multiset a)]
+        [$tgt (if ((include? (multiset a)) tgt xs)
+                  {((remove-collection a) tgt xs)}
+                  {})]]
+       [$ [something]
+        {[$tgt {tgt}]}]
+       })))
+
+(define $set : ((Matcher $a) -> (Matcher (Collection ,a)))
+  (lambda [$a]
+    (matcher
+      {[<nil> []
+        {[{} {[]}]
+         [_ {}]}]
+       [<cons $ $> [a (set a)]
+        [$tgt (match-all tgt (list a)
+                [<join _ <cons $x _>> [x tgt]])]]
+       [$ [something]
+        {[$tgt {tgt}]}]
+       })))
 
 ;
 ; Types of types are declared with '::' infix operator.
