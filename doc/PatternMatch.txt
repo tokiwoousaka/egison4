@@ -6,6 +6,10 @@
 ;;; Pattern examples
 ;;;
 
+;;
+;; pattern function
+;;
+
 (define $seq-pat : ([VarName (Pattern $a)] -> (Pattern a))
   (lambda [$name $pat]
     (seq-pat-helper name pat 1)))
