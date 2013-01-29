@@ -51,6 +51,11 @@
          [[<cons $x $xs2> <cons (? eq? [x $]) (? eq? [xs2 $])>] #t]
          [_ #f]}))))
 
+;
+; A value pattern is a syntax sugar.
+; e.g. ,x => (? eq? [x $])
+;
+
 (define $list : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher
@@ -73,7 +78,7 @@
        [<join _ _> [(list a) (list a)]
 	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
 				                   (match ys (list a)
-				                     {[<nil> {[xs {}]}]
+			                     {[<nil> {[xs {}]}]
 				                      [<cons $z $zs> {[xs ys] @(helper {@xs z} zs)}]}))]}
 		         (helper {} tgt))]}]
        [<nioj ,$pxs _> [(list a)]
@@ -131,7 +136,7 @@
   {$show : (,a -> String)})
 
 (define-class $Eq [$a]
-  {$= : ([,a ,a] -> Bool)})
+  {$eq? : ([,a ,a] -> Bool)})
 
 (define-class $Ord [$a $b]
   {$compare : ([,a ,b] -> Ordering)
