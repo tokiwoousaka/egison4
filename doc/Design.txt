@@ -266,7 +266,10 @@ String
 
 VarName
 
+Collection
 IO
+Pattern
+Matcher
 
 ;;
 ;; Buildin Class
