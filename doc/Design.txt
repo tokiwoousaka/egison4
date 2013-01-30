@@ -51,6 +51,9 @@
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
+;
+; 'function' expression is like 'match-lambda' of other languages.
+;
 (define $equal?
   (lambda [$matcher]
     (function [matcher matcher]
