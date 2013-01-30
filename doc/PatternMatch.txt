@@ -27,7 +27,6 @@
   (lambda [$var $pat $i]
     <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
 
-
 ;;;
 ;;; Pattern matching mechanism
 ;;; -- First class patterns
@@ -56,7 +55,7 @@
 ; (test-pat %x 10)
 ; 1. Create a value-pattern-closure.
 ;    -> (ValuePatternClosure env (+ `%x (+ 1 n)))
-; 2. Expand `%var with the result in the middle of pattern matching
+; 2. Expand and evaluate `%var ahead with the result in the middle of pattern matching on the environment of pattern matching expression
 ;    -> (ValuePatternClosure env (+ 3 (+ 1 n)))
 ; 3. Evaluate value-pattern-closure
 ;    -> 14
