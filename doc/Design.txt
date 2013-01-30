@@ -115,9 +115,11 @@
         [$tgt (match-all tgt (list a)
                 [<join $hs <cons $x $ts>> [x {@hs @ts}]])]]
        [<join ,$xs $> [(multiset a)]
-        [$tgt (if ((include? (multiset a)) tgt xs)
-                  {((remove-collection a) tgt xs)}
-                  {})]]
+        {[$tgt (letrec {[$looper (function [(multiset a) (multiset a)]
+                                   {[[<nil> $tgt2] {[tgt2]}]
+                                     [[<cons $x $xs2> <cons ,x $tgt2>] (looper xs2 tgt2)]
+                                     [_ {}]})]}
+                 (looper xs tgt))]}]
        [$ [something]
         {[$tgt {tgt}]}]
        })))
@@ -154,13 +156,13 @@
      <greater>
      }))
 
-(define $map : ([($a -> $b) (Collection ,a)] -> (Collection ,b))
+(define $map : [($a -> $b) (Collection ,a)] -> (Collection ,b)
   (lambda [$fn $ls]
     (match ls (list something)
       {[<nil> {}]
        [<cons $x $xs> {(fn x) @(map fn xs)}]})))
 
-(define $remove : ([(Matcher $a) (Collection ,a) ,a] -> (Collection ,a))
+(define $remove : (Matcher $a) -> [(Collection ,a) ,a] -> (Collection ,a)
   (lambda [$matcher]
     (lambda [$xs $x]
       (match xs (list typ)
@@ -168,7 +170,7 @@
          [<cons ,x $rs> rs]
          [<cons $y $rs> {y @(remove a rs x)}]}))))
 
-(test (remove (mod 13) {10 2 14} 1))
+(test ((remove (mod 13)) {10 2 14} 1))
 
 ;;
 ;; Class Example
