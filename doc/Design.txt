@@ -74,27 +74,30 @@
         {[{.$xs $x} {[x xs]}]
          [_ {}]}]
        [<join ,$hs $> [(list a)]
-        {[$tgt (letrec {[$helper (lambda [$xs $ys]
-                                   (match [xs ys] [(list a) (list a)]
-                                     {[[<nil> _] {ys}]
-                                      [[<cons $x $xs2> <cons ,x $ys2>] (helper xs2 ys2)]
-                                      [[_ _] {}]}))]}
-                 (helper hs tgt))]}]
-       [<join _ _> [(list a) (list a)]
-	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
-				                   (match ys (list a)
-			                     {[<nil> {[xs {}]}]
-				                      [<cons $z $zs> {[xs ys] @(helper {@xs z} zs)}]}))]}
-		         (helper {} tgt))]}]
-       [<nioj ,$pxs _> [(list a)]
-        {[$tgt (match-all tgt (list a) [<join $ys ,pxs> ys])]}]
-       [<nioj _ _> [(list a) (list a)]
-	    {[$tgt (letrec {[$helper (lambda [$xs $ys]
-				                   (match ys (list a)
-				                     {[<nil> {[{} xs]}]
-				                      [<cons $z $zs> {[ys xs] @(helper {@xs z} zs)}]}))]}
-		         (helper {} tgt))]}]
-       [_ [something]
+        {[$tgt (letrec {[$looper (function [(list a) (list a)]
+                                   {[[<nil> $ys] {ys}]
+                                    [[<cons $x $xs2> <cons ,x $ys2>] (looper xs2 ys2)]
+                                    [[_ _] {}]})]}
+                 (looper hs tgt))]}]
+       [<join $ $> [(list a) (list a)]
+        {[$tgt (letrec {[$looper (lambda [$ret $xs $ys]
+                                   (match ys (list a)
+                                     {[<nil> {@ret [xs {}]}]
+                                      [<cons $y $ys2> (looper {@ret [xs ys]} {@xs y} ys2)]}))]}
+                 (looper {} {} tgt))]}]
+       [<nioj ,$ts $> [(list a)]
+        {[$tgt (letrec {[$looper (function [(list a) (list a)]
+                                   {[[<nil> $ys] {ys}]
+                                    [[<snoc $x $xs2> <snoc ,x $ys2>] (looper xs2 ys2)]
+                                    [[_ _] {}]})]}
+                 (looper ts tgt))]}]
+       [<nioj $ $> [(list a) (list a)]
+        {[$tgt (letrec {[$looper (lambda [$ret $xs $ys]
+                                   (match ys (list a)
+                                     {[<nil> {@ret [xs {}]}]
+                                      [<snoc $y $ys2> (looper {[xs ys] @ret} {@xs y} ys2)]}))]}
+                 (looper {} {} tgt))]}]
+       [$ [something]
         {[$tgt {tgt}]}]
        ))))
 
