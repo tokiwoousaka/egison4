@@ -11,12 +11,12 @@
 ;;
 
 (define $seq-pat : ([VarName (Pattern $a)] -> (Pattern a))
-  (lambda [$name $pat]
-    (seq-pat-helper name pat 1)))
+  (lambda [$var $pat]
+    (seq-pat-helper var pat 1)))
 
 (define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
-  (lambda [$name $pat $i]
-    <cons ,(+ `name i) (| (seq-pat-helper name (+ i 1)) (&& ^(seq-pat-helper name (+ i 1)) pat>))>))
+  (lambda [$var $pat $i]
+    <cons ,(+ `var i) (| (seq-pat-helper var (+ i 1)) (& ^(seq-pat-helper var (+ i 1)) pat>))>))
 
 ;
 ; '|.' is a new pattern operator from Egison3.
@@ -24,8 +24,8 @@
 ;
 
 (define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
-  (lambda [$name $pat $i]
-    <cons ,(+ `name i) (|. (seq-pat-helper name (+ i 1)) pat)>))
+  (lambda [$var $pat $i]
+    <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
 
 
 ;;;
@@ -76,9 +76,9 @@ patternMatchCore env frame matcher pattern target =
     (ValuePattern env expr) ->
        
 evalValuePat env expr frame =
-evalValuePat env (OmitExpr name nums) frame =
-  case getValue env (name, nums) of
-    (VarName name nums) -> cEval (getValueFromFrame frame (name, nums))
+evalValuePat env (OmitExpr var nums) frame =
+  case getValue env (var, nums) of
+    (VarName var nums) -> cEval (getValueFromFrame frame (var, nums))
     _ -> throwError "..."
 evalValuePat env expr frame = do
   val <- eval1 env expr

@@ -98,7 +98,7 @@
         {[$tgt {tgt}]}]
        ))))
 
-(define $multiset : ((Matcher $a) -> (Matcher (Collection ,a)))
+(define $multiset : (Matcher $a) -> (Matcher (Collection ,a))
   (lambda [$a]
     (matcher
       {[,$val []
@@ -162,7 +162,7 @@
 (define $remove : (Matcher $a) -> [(Collection ,a) ,a] -> (Collection ,a)
   (lambda [$matcher]
     (lambda [$xs $x]
-      (match xs (list typ)
+      (match xs (list matcher)
         {[<nil> {}]
          [<cons ,x $rs> rs]
          [<cons $y $rs> {y @(remove a rs x)}]}))))
@@ -198,6 +198,7 @@
 (instance Show Char {[$show show-char]})
 (instance Show Integer {[$show show-integer]})
 (instance Show String {[$show id]})
+(instance Show (Collection $a :: Show) {[$show show-list]})
 
 (instance Ord [Integer Integer]
   {[$compare compare-integer]
@@ -218,12 +219,12 @@
 ;;;
 
 ;
-; 
 ; e.g. (+ $ 10) => (lambda [$x] (+ x 10))
+;      (+3 $2 20 $1) => (lambda [$v1 $v2] (+3 v2 10 v1))
 ;
 ((+ $ 10) 5)
 
-((map $ id) {1 2 3})
+((map id $) {1 2 3})
 
 ;;
 ;; predicate pattern
