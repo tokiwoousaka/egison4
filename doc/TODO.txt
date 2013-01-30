@@ -1,0 +1,7 @@
+;;;
+;;; Etc
+;;;
+
+Egison logo
+Egison manaul
+Egison package system

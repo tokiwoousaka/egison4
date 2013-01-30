@@ -32,7 +32,7 @@ data EgisonExpr =
   | VarExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
   | VarNameExpr String (Maybe EgisonTypeExpr)
   | PatVarOmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
-  | VarOmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
+  | OmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
 
   | WildCardExpr (Maybe EgisonTypeExpr)
   | ValuePatExpr EgisonExpr (Maybe EgisonTypeExpr)
@@ -88,54 +88,10 @@ data EgisonTypeExpr =
  deriving (Show)
           
 data EgisonClassExpr =
-    SomeTypeClassExpr
+    TypeClassExpr
   | VarClassExpr String
   | FunClassExpr EgisonClassExpr EgisonClassExpr
         
-data EgisonTypedExpr =
-    CharTypedExpr Char EgisonType
-  | StringTypedExpr String EgisonType
-  | BoolTypedExpr Bool EgisonType
-  | IntegerTypedExpr Integer EgisonType
-  | FloatTypedExpr Double EgisonType
-  | PatVarTypedExpr String [EgisonTypedExpr] EgisonType
-  | VarTypedExpr String [EgisonTypedExpr] EgisonType
-  | SymbolTypedExpr String EgisonType
-  | PatVarOmitTypedExpr String [EgisonTypedExpr] EgisonType
-  | VarOmitTypedExpr String [EgisonTypedExpr] EgisonType
-
-  | WildCardTypedExpr EgisonType
-  | ValuePatTypedExpr EgisonTypedExpr EgisonType
-  | CutPatTypedExpr EgisonTypedExpr EgisonType
-  | NotPatTypedExpr EgisonTypedExpr EgisonType
-  | AndPatTypedExpr [EgisonTypedExpr] EgisonType
-  | OrPatTypedExpr [EgisonTypedExpr] EgisonType
-  | PredPatTypedExpr EgisonTypedExpr [EgisonTypedExpr] EgisonType
-
-  | InductiveDataTypedExpr String [EgisonTypedExpr] EgisonType
-  | TupleTypedExpr [EgisonTypedExpr] EgisonType
-  | CollectionTypedExpr [InnerTypedExpr] EgisonType
-  | FuncTypedExpr EgisonTypedExpr EgisonTypedExpr EgisonType
-
-  | IfTypedExpr EgisonTypedExpr EgisonTypedExpr EgisonTypedExpr EgisonType
-  | LetTypedExpr Bindings EgisonTypedExpr EgisonType
-  | LetRecTypedExpr RecursiveBindings EgisonTypedExpr EgisonType
-
-  | TypeTypedExpr TypeInfoExpr EgisonType
-  | ClassTypedExpr ClassInfoExpr EgisonType
-
-  | MatchTypedExpr EgisonTypedExpr EgisonTypedExpr [MatchClause] EgisonType
-  | MatchAllTypedExpr EgisonTypedExpr EgisonTypedExpr MatchClause EgisonType
-
-  | LoopTypedExpr String String EgisonTypedExpr EgisonTypedExpr EgisonTypedExpr EgisonType
-  | DoTypedExpr Bindings EgisonTypedExpr EgisonType
-
-  | ApplyTypedExpr EgisonTypedExpr EgisonTypedExpr EgisonType
-
-  | SomethingTypedExpr EgisonType
-  | UndefinedTypedExpr EgisonType
- deriving (Show)
-
 type MatchClause = (EgisonExpr, EgisonExpr)
 
 data PrimitivePatPattern =
@@ -175,6 +131,14 @@ type RecursiveBindings = [(String, EgisonExpr)]
 type MatcherInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, EgisonExpr)])]
 
 type ClassInfoExpr = [(String, EgisonTypeExpr)]
+
+--
+-- Typed Expression
+--
+
+data EgisonTypedExpr =
+ deriving (Show)
+
 
 --
 -- Values
