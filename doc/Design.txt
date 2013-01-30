@@ -47,7 +47,7 @@
 	    {[$tgt (if (eq? (mod val m) (mod tgt m))
                    {[]}
                    {})]}]
-       [_ [integer]
+       [$ [integer]
 	    {[$tgt {(mod tgt m)}]}]
        })))
 
