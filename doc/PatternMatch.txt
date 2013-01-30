@@ -27,6 +27,9 @@
   (lambda [$var $pat $i]
     <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
 
+
+<cons $m <cons ?(dividable $ m) _>>
+
 ;;;
 ;;; Pattern matching mechanism
 ;;; -- First class patterns
