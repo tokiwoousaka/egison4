@@ -54,12 +54,6 @@
 ;
 ; 'function' expression is like 'match-lambda' of other languages.
 ;
-(define $equal?
-  (lambda [$matcher]
-    (function [matcher matcher]
-      {[[$zs ,zs] #t]
-       [_ #f]})))
-
 (define $list : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher
@@ -185,6 +179,15 @@
 (define-class $Eq [$a]
   {$eq? : ([,a ,a] -> Bool)})
 
+(define-class $Match [$a]
+  {$matcher-of : (,a -> Matcher)})
+
+(define $match? : ($a :: Match -> Bool)
+  (lambda [$x $y]
+    (match [x y] [(matcher-of x) (matcher-of y)]
+      {[[$zs ,zs] #t]
+       [_ #f]})))
+
 (define-class $Ord [$a $b]
   {$compare : ([,a ,b] -> Ordering)
    $lt? : ([,a ,b] -> Bool)
@@ -271,3 +274,4 @@ IO
 Show
 Eq
 Ord
+Match
