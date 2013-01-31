@@ -127,9 +127,10 @@
       {[<nil> []
         {[{} {[]}]
          [_ {}]}]
-       [<cons $ $> [a (set a)]
-        [$tgt (match-all tgt (list a)
-                [<join _ <cons $x _>> [x tgt]])]]
+       [<cons $ _> [a]
+        [$tgt tgt]]
+       [<cons ,val $> [(set a)]
+        [$tgt {tgt}]]
        [$ [something]
         {[$tgt {tgt}]}]
        })))
