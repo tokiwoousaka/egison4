@@ -121,6 +121,35 @@
         {[$tgt {tgt}]}]
        })))
 
+;
+; Definition of multiset is written also as below.
+; * pay atterntion around `cons' matcher clauses.
+;
+(define $multiset : (Matcher $a) -> (Matcher (Collection ,a))
+  (lambda [$a]
+    (matcher
+      {[,$val []
+        {[$tgt (if ((equal-multiset? a) val tgt)
+                   {[]}
+                   {})]}]
+       [<nil> []
+        {[{} {[]}]
+         [_ {}]}]
+       [<cons $ _> [a]
+        [$tgt tgt]]
+       [<cons ,val $> [(multiset a)]
+        [$tgt (match-all tgt (list a)
+                [<join $hs <cons ,val $ts>> [{@hs @ts}]])]]
+       [<join ,$xs $> [(multiset a)]
+        {[$tgt (letrec {[$looper (function [(multiset a) (multiset a)]
+                                   {[[<nil> $tgt2] {[tgt2]}]
+                                     [[<cons $x $xs2> <cons ,x $tgt2>] (looper xs2 tgt2)]
+                                     [_ {}]})]}
+                 (looper xs tgt))]}]
+       [$ [something]
+        {[$tgt {tgt}]}]
+       })))
+
 (define $set : ((Matcher $a) -> (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher
@@ -129,7 +158,7 @@
          [_ {}]}]
        [<cons $ _> [a]
         [$tgt tgt]]
-       [<cons ,val $> [(set a)]
+       [<cons _ $> [(set a)]
         [$tgt {tgt}]]
        [$ [something]
         {[$tgt {tgt}]}]
