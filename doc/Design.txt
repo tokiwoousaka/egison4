@@ -264,6 +264,22 @@
 
 <cons ?(lt? $ 10) _>
 
+;;
+;; IO
+;;
+(define $main : Args ->  IO []
+  (lambda [$args]
+    (do {(write "input : ")
+         (flush)
+         [$val (read)]
+         (write {@"output : " @(show val) @"\n"})}
+        [])))
+
+(define $read-two-line : IO String
+  (do {[$line1 (read-line)]
+       [$line2 (read-line)]}
+      {@line1 @line2}))
+
 ;;;
 ;;; Module system
 ;;;
@@ -309,3 +325,14 @@ Show
 Eq
 Ord
 Match
+Monad
+
+;;;
+;;; Message Passing
+;;;
+
+(send node-name message)
+
+(recieve matcher
+  {[...]
+   ...})
