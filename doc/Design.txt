@@ -226,12 +226,12 @@
    $le? : ([,a ,b] -> Bool)
    $ge? : ([,a ,b] -> Bool)})
 
-(instance Show Char {[$show show-char]})
-(instance Show Integer {[$show show-integer]})
-(instance Show String {[$show id]})
-(instance Show (Collection $a :: Show) {[$show show-list]})
+(class-instance Show Char {[$show show-char]})
+(class-instance Show Integer {[$show show-integer]})
+(class-instance Show String {[$show id]})
+(class-instance Show (Collection $a :: Show) {[$show show-list]})
 
-(instance Ord [Integer Integer]
+(class-instance Ord [Integer Integer]
   {[$compare compare-integer]
    [$lt? lt-i]
    [$gt? gt-i]
@@ -257,14 +257,14 @@
 (define $multiset-normal : (Matcher $a) -> Matcher (Collection ,a)
   (matcher ...))
 
-(define-sort $Multiset [$A]
+(define-kind $Multiset [$A]
   {$multiset : (Matcher $a :: ,A) -> Matcher (Collection ,a)})
 
-(sort-instance Multiset Ord {[$multiset multiset-ord]})
+(kind-instance Multiset Ord {[$multiset multiset-ord]})
 
-(sort-instance Multiset Eq {[$multiset multiset-eq]})
+(kind-instance Multiset Eq {[$multiset multiset-eq]})
 
-(sort-instance Multiset Type {[$multiset multiset-normal]})
+(kind-instance Multiset Type {[$multiset multiset-normal]})
 
 ;;;
 ;;; Partial evaluation
