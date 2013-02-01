@@ -254,7 +254,7 @@
 (define $multiset-eq : (Matcher $a :: Eq) -> Matcher (Collection ,a)
   (matcher ...))
 
-(define $multiset-normal : (Matcher $a :: Eq) -> Matcher (Collection ,a)
+(define $multiset-normal : (Matcher $a) -> Matcher (Collection ,a)
   (matcher ...))
 
 (define-sort $Multiset [$A]
