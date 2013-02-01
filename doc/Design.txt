@@ -210,11 +210,12 @@
   {$eq? : ([,a ,a] -> Bool)})
 
 (define-class $Match [$a]
-  {$matcher-of : (,a -> Matcher)})
+  {$data-to-matcher : ,a -> (Matcher ,a)}
+  {$matcher-to-type : (Matcher ,a) -> Type})
 
 (define $match? : ($a :: Match -> Bool)
   (lambda [$x $y]
-    (match [x y] [(matcher-of x) (matcher-of y)]
+    (match [x y] [(data-to-matcher x) (data-to-matcher y)]
       {[[$zs ,zs] #t]
        [_ #f]})))
 
@@ -243,6 +244,27 @@
 ;
 (define $print : ($a :: Show -> String)
   (lambda [x] (++ (show x) "\n")))
+
+;;;
+;;; Matcher depends on Class
+;;;
+(define $multiset-ord : (Matcher $a :: Ord) -> Matcher (Collection ,a)
+  (matcher ...))
+
+(define $multiset-eq : (Matcher $a :: Eq) -> Matcher (Collection ,a)
+  (matcher ...))
+
+(define $multiset-normal : (Matcher $a :: Eq) -> Matcher (Collection ,a)
+  (matcher ...))
+
+(define-sort $Multiset [$A]
+  {$multiset : (Matcher $a :: ,A) -> Matcher (Collection ,a)})
+
+(sort-instance Multiset Ord {[$multiset multiset-ord]})
+
+(sort-instance Multiset Eq {[$multiset multiset-eq]})
+
+(sort-instance Multiset Type {[$multiset multiset-normal]})
 
 ;;;
 ;;; Partial evaluation
