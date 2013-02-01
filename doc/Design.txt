@@ -264,6 +264,10 @@
 
 (kind-instance Multiset Eq {[$multiset multiset-eq]})
 
+;
+; Subtyping sytstem enable to choose `multiset-ord' not `multiset-normal'
+; when the type class of the type of the argument is `Ord'.
+;
 (kind-instance Multiset Type {[$multiset multiset-normal]})
 
 ;;;
