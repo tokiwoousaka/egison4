@@ -1,0 +1,41 @@
+;;;;;
+;;;;; Geometry with Egison
+;;;;;
+
+
+
+Figure := Point | Line | Circle
+
+Point := <point string>
+
+;
+; A stick is a list without direction.
+; e.g. {1 2 3 4} <=> {4 3 2 1}
+;
+Line := <line (stick point)>
+
+Circle := <circle point (stick point)>
+
+;;;
+
+<line {<point "A"> <point "B">}>
+
+<line {<point "B"> <point "C">}>
+
+<line {<point "C"> <point "A">}>
+
+
+;;;
+
+<line {<point "A"> <point "D1"> <point "B">}>
+
+<line {<point "B"> <point "D2"> <point "C">}>
+
+<line {<point "C"> <point "D3"> <point "A">}>
+
+<circle <point "C1"> {<point "D1"> <point "D2"> <point "D3">}>
+
+
+;;;
+
+
