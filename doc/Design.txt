@@ -1,4 +1,4 @@
-;;;;;
+                                                                                                                                     ;;;;;
 ;;;;; Design of Egison3
 ;;;;;
 
@@ -189,13 +189,17 @@
       {[<nil> {}]
        [<cons $x $xs> {(fn x) @(map fn xs)}]})))
 
+;
+; We need to pass matcher to some function to indicate what matcher to use.
+; This is because there are many muchers for one type.
+;
 (define $remove : (Matcher $a) -> [(Collection ,a) ,a] -> (Collection ,a)
   (lambda [$matcher]
     (lambda [$xs $x]
       (match xs (list matcher)
         {[<nil> {}]
          [<cons ,x $rs> rs]
-         [<cons $y $rs> {y @(remove a rs x)}]}))))
+         [<cons $y $rs> {y @((remove a) rs x)}]}))))
 
 (test ((remove (mod 13)) {10 2 14} 1))
 
@@ -206,8 +210,8 @@
 (define-class $Show [$a]
   {$show : (,a -> String)})
 
-(define-class $Eq [$a]
-  {$eq? : ([,a ,a] -> Bool)})
+(define-class $Eq [$a $b]
+  {$eq? : ([,a ,b] -> Bool)})
 
 (define-class $Match [$a]
   {$data-to-matcher : ,a -> (Matcher ,a)}
@@ -267,6 +271,7 @@
 ;
 ; Subclassing sytstem enable to choose `multiset-ord' not `multiset-normal'
 ; when the type class of the type of the argument is `Ord'.
+; e.gi. Ord <: Eq <: Type
 ;
 (kind-instance Multiset Type {[$multiset multiset-normal]})
 
