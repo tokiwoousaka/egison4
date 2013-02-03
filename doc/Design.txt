@@ -1,4 +1,4 @@
-                                                                                                                                     ;;;;;
+;;;;;
 ;;;;; Design of Egison3
 ;;;;;
 
@@ -44,11 +44,11 @@
   (lambda [$m]
     (matcher
       {[,$val []
-	    {[$tgt (if (eq? (mod val m) (mod tgt m))
+        {[$tgt (if (eq? (mod val m) (mod tgt m))
                    {[]}
                    {})]}]
        [$ [integer]
-	    {[$tgt {(mod tgt m)}]}]
+        {[$tgt {(mod tgt m)}]}]
        })))
 
 ;
