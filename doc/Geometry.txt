@@ -2,8 +2,6 @@
 ;;;;; Geometry with Egison
 ;;;;;
 
-
-
 Figure := Point | Line | Circle
 
 Point := <point string>
@@ -15,6 +13,7 @@ Point := <point string>
 Line := <line (stick point)>
 
 Circle := <circle point (stick point)>
+
 
 ;;;
 
@@ -38,4 +37,22 @@ Circle := <circle point (stick point)>
 
 ;;;
 
+<line {<point "A"> <point "D1"> <point "B">}>
+
+<line {<point "B"> <point "D2"> <point "C">}>
+
+<line {<point "C"> <point "D3"> <point "A">}>
+
+<circle <point "C1"> {<point "D1"> <point "D2"> <point "D3">}>
+
+=>
+
+<eq-angle <angle <point "B"> <point "A"> <point "C1">>
+          <angle <point "C"> <point "A"> <point "C1">>>
+
+<eq-angle <angle <point "A"> <point "B"> <point "C1">>
+          <angle <point "C"> <point "B"> <point "C1">>>
+
+<eq-angle <angle <point "A"> <point "C"> <point "C1">>
+          <angle <point "B"> <point "C"> <point "C1">>>
 
