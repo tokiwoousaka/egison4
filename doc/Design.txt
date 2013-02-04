@@ -96,7 +96,7 @@
                  (looper {} {} tgt))]}]
        [$ [something]
         {[$tgt {tgt}]}]
-       ))))
+       })))
 
 (define $multiset : (Matcher $a) -> (Matcher (Collection ,a))
   (lambda [$a]
@@ -271,7 +271,7 @@
 ;
 ; Subclassing sytstem enable to choose `multiset-ord' not `multiset-normal'
 ; when the type class of the type of the argument is `Ord'.
-; e.gi. Ord <: Eq <: Type
+; e.g. Ord <:: Eq <:: Type
 ;
 (kind-instance Multiset Type {[$multiset multiset-normal]})
 
