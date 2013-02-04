@@ -10,11 +10,11 @@
 ;; pattern function
 ;;
 
-(define $seq-pat : ([VarName (Pattern $a)] -> (Pattern a))
+(define $seq-pat : (\ [VarName (Pattern $a)] (Pattern a))
   (lambda [$var $pat]
     (seq-pat-helper var pat 1)))
 
-(define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
+(define $seq-pat-helper : (\ [VarName (Pattern $a) Integer] (Pattern a))
   (lambda [$var $pat $i]
     <cons ,(+ `var i) (| (seq-pat-helper var (+ i 1)) (& ^(seq-pat-helper var (+ i 1)) pat>))>))
 
@@ -23,7 +23,7 @@
 ; With this operator, we can write "seq-pat-helper' as bellow.
 ;
 
-(define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
+(define $seq-pat-helper : (\ [VarName (Pattern $a) Integer] (Pattern a))
   (lambda [$var $pat $i]
     <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
 
@@ -41,14 +41,14 @@
 ; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
 ; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
 ;
-(define $shuntsu : [VarName (Pattern (Collection Integer))] -> (Pattern (Collection Integer))
+(define $shuntsu : (\ [VarName (Pattern (Collection Integer))] (Pattern (Collection Integer)))
   (lambda [$s $pat]
     <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
 
 ; (shuntsu %n1 (shuntsu $n2 (shuntsu $n3 _)
 ; {1 2 3 3 4 5 2 3 4}
 
-(define $test-pat : ([VarName Integer] -> (Pattern (Collection Integer)))
+(define $test-pat : (\ [VarName Integer] (Pattern (Collection Integer)))
   (lambda [$s $n]
     ,(+ `s (+ 1 n))))
 
