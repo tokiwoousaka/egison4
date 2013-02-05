@@ -2,25 +2,20 @@
 ;;;;; Geometry with Egison
 ;;;;;
 
-Situation := ((multiset Point),
-              (multiset Figure),
-              (multiset Condition))
+Situation := (multiset Condition)
 
 Point := <point string>
-
-Figure := Line | Circle
 
 ;
 ; A stick is a list without direction.
 ; e.g. {1 2 3 4} <=> {4 3 2 1}
 ;
-Line := <line (stick point)>
-
-Circle := <circle point (stick point)>
-
-Condition := <eq-angle (multiset <angle half-line half-line>)>
-           | <eq-length (multiset <line-segment point point>)>
-           | <parallel (multiset <line (multiset point)>)>
+Condition :=
+  | <line (stick point)>
+  | <circle (stick point)>
+  | <eq-angle (multiset <angle half-line half-line>)>
+  | <eq-length (multiset <line-segment point point>)>
+  | <parallel (multiset <line (multiset point)>)>
 
 Theorem := Situation -> Situation
 
