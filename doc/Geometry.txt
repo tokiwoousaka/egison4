@@ -2,9 +2,13 @@
 ;;;;; Geometry with Egison
 ;;;;;
 
-Figure := Point | Line | Circle
+Situation := ((multiset Point),
+              (multiset Figure),
+              (multiset Condition))
 
 Point := <point string>
+
+Figure := Line | Circle
 
 ;
 ; A stick is a list without direction.
@@ -14,15 +18,19 @@ Line := <line (stick point)>
 
 Circle := <circle point (stick point)>
 
+Condition := <eq-angle (multiset <angle half-line half-line>)>
+           | <eq-length (multiset <line-segment point point>)>
+           | <parallel (multiset <line (multiset point)>)>
+
+Theorem := Situation -> Situation
 
 ;;;
 
-<line {<point "A"> <point "B">}>
-
-<line {<point "B"> <point "C">}>
-
-<line {<point "C"> <point "A">}>
-
+(define $inscribed-angle
+  (function Situation
+     {[_ <cons <circle _ {$a $c1 $c2 $b}> _> _]
+      <eq-angle {<angle (half-line c1 a) (half-line c1 b)>
+                 <angle (half-line c2 a) (half-line c2 b)>}>}))
 
 ;;;
 
