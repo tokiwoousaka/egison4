@@ -272,6 +272,8 @@
 ; Subclassing sytstem enable to choose `multiset-ord' not `multiset-normal'
 ; when the type class of the type of the argument is `Ord'.
 ; e.g. Ord <:: Eq <:: Type
+; Egison has subtyping system too.
+; e.g. Nat <: Integer
 ;
 (kind-instance Multiset Type {[$multiset multiset-normal]})
 
