@@ -23,47 +23,47 @@ data EgisonTopExpr =
  deriving (Show)
 
 data EgisonExpr =
-    CharExpr Char (Maybe EgisonTypeExpr)
-  | StringExpr String (Maybe EgisonTypeExpr)
-  | BoolExpr Bool (Maybe EgisonTypeExpr)
-  | IntegerExpr Integer (Maybe EgisonTypeExpr)
-  | FloatExpr Double (Maybe EgisonTypeExpr)
-  | PatVarExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
-  | VarExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
-  | VarNameExpr String (Maybe EgisonTypeExpr)
-  | PatVarOmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
-  | OmitExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
+    CharExpr Char
+  | StringExpr String
+  | BoolExpr Bool
+  | IntegerExpr Integer
+  | FloatExpr Double
+  | PatVarExpr String [EgisonExpr]
+  | VarExpr String [EgisonExpr]
+  | VarNameExpr String
+  | PatVarOmitExpr String [EgisonExpr]
+  | OmitExpr String [EgisonExpr]
 
-  | WildCardExpr (Maybe EgisonTypeExpr)
-  | ValuePatExpr EgisonExpr (Maybe EgisonTypeExpr)
-  | CutPatExpr EgisonExpr (Maybe EgisonTypeExpr)
-  | NotPatExpr EgisonExpr (Maybe EgisonTypeExpr)
-  | AndPatExpr [EgisonExpr] (Maybe EgisonTypeExpr)
-  | OrPatExpr [EgisonExpr] (Maybe EgisonTypeExpr)
-  | PredPatExpr EgisonExpr [EgisonExpr] (Maybe EgisonTypeExpr)
+  | WildCardExpr
+  | ValuePatExpr EgisonExpr
+  | CutPatExpr EgisonExpr
+  | NotPatExpr EgisonExpr
+  | AndPatExpr [EgisonExpr]
+  | OrPatExpr [EgisonExpr]
+  | PredPatExpr EgisonExpr [EgisonExpr]
 
-  | InductiveDataExpr String [EgisonExpr] (Maybe EgisonTypeExpr)
-  | TupleExpr [EgisonExpr] (Maybe EgisonTypeExpr)
-  | CollectionExpr [InnerExpr] (Maybe EgisonTypeExpr)
-  | FuncExpr EgisonExpr EgisonExpr (Maybe EgisonTypeExpr)
+  | InductiveDataExpr String [EgisonExpr]
+  | TupleExpr [EgisonExpr]
+  | CollectionExpr [InnerExpr]
+  | FuncExpr EgisonExpr EgisonExpr
 
-  | IfExpr EgisonExpr EgisonExpr EgisonExpr (Maybe EgisonTypeExpr)
-  | LetExpr Bindings EgisonExpr (Maybe EgisonTypeExpr)
-  | LetRecExpr RecursiveBindings EgisonExpr (Maybe EgisonTypeExpr)
-  | DoExpr Bindings EgisonExpr (Maybe EgisonTypeExpr)
+  | IfExpr EgisonExpr EgisonExpr EgisonExpr
+  | LetExpr Bindings EgisonExpr
+  | LetRecExpr RecursiveBindings EgisonExpr
+  | DoExpr Bindings EgisonExpr
 
-  | MatchExpr EgisonExpr EgisonExpr [MatchClause] (Maybe EgisonTypeExpr)
-  | MatchAllExpr EgisonExpr EgisonExpr MatchClause (Maybe EgisonTypeExpr)
+  | MatchExpr EgisonExpr EgisonExpr [MatchClause]
+  | MatchAllExpr EgisonExpr EgisonExpr MatchClause
 
-  | MatcherExpr MatcherInfoExpr (Maybe EgisonTypeExpr)
+  | MatcherExpr MatcherInfoExpr
   
-  | ClassExpr ClassInfoExpr (Maybe EgisonTypeExpr)
-  | InstanceExpr ClassInfoExpr (Maybe EgisonTypeExpr)
+  | ClassExpr ClassInfoExpr
+  | InstanceExpr ClassInfoExpr
 
-  | ApplyExpr EgisonExpr EgisonExpr (Maybe EgisonTypeExpr)
+  | ApplyExpr EgisonExpr EgisonExpr
 
-  | SomethingExpr (Maybe EgisonTypeExpr)
-  | UndefinedExpr (Maybe EgisonTypeExpr)
+  | SomethingExpr
+  | UndefinedExpr
  deriving (Show)
 
 data EgisonTypeExpr =
