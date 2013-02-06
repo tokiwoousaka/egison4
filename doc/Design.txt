@@ -98,7 +98,7 @@
         {[$tgt {tgt}]}]
        })))
 
-(define $multiset : (\ (Matcher $a) (Matcher (Collection ,a)))
+(define $multiset-normal : (\ (Matcher $a) (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher
       {[,$val []
@@ -125,7 +125,7 @@
 ; Definition of multiset is written also as below.
 ; * pay atterntion around `cons' matcher clauses.
 ;
-(define $multiset : (\ (Matcher $a) (Matcher (Collection ,a)))
+(define $multiset-eq : (\ (Matcher $a) (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher
       {[,$val []
@@ -136,7 +136,7 @@
         {[{} {[]}]
          [_ {}]}]
        [<cons $ _> [a]
-        [$tgt tgt]]
+        [$tgt (unique tgt)]]
        [<cons ,val $> [(multiset a)]
         [$tgt (match-all tgt (list a)
                 [<join $hs <cons ,val $ts>> [{@hs @ts}]])]]
@@ -268,7 +268,7 @@
 
 (kind-instance Multiset Eq {[$multiset multiset-eq]})
 
-;
+;              
 ; Subclassing sytstem enable to choose `multiset-ord' not `multiset-normal'
 ; when the type class of the type of the argument is `Ord'.
 ; e.g. Ord <:: Eq <:: Type
