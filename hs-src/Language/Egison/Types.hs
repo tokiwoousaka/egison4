@@ -17,7 +17,7 @@ data EgisonTopExpr =
   | Instance String [String] [(String, String)]
   | Test EgisonExpr
   | Execute [String]
-    -- temprary : we will replace load to import and export
+    -- temporary : we will replace load to import and export
   | LoadFile String
   | Load String
  deriving (Show)
@@ -137,8 +137,20 @@ type ClassInfoExpr = [(String, EgisonTypeExpr)]
 --
 
 data EgisonTypedExpr =
+ Hoge
  deriving (Show)
 
+data DefineTypeExpr =
+  Huga
+ deriving (Show)
+
+data DefineClassExpr =
+  Piyo
+ deriving (Show)
+
+data Environment =
+  Poyo
+ deriving (Show)
 
 --
 -- Values
