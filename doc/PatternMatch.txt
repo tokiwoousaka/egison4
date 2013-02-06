@@ -10,22 +10,22 @@
 ;; pattern function
 ;;
 
-(define $seq-pat : ([VarName (Pattern $a)] -> (Pattern a))
-  (lambda [$name $pat]
-    (seq-pat-helper name pat 1)))
+(define $seq-pat : (\ [VarName (Pattern $a)] (Pattern a))
+  (lambda [$var $pat]
+    (seq-pat-helper var pat 1)))
 
-(define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
-  (lambda [$name $pat $i]
-    <cons ,(+ `name i) (| (seq-pat-helper name (+ i 1)) (&& ^(seq-pat-helper name (+ i 1)) pat>))>))
+(define $seq-pat-helper : (\ [VarName (Pattern $a) Integer] (Pattern a))
+  (lambda [$var $pat $i]
+    <cons ,(+ `var i) (| (seq-pat-helper var (+ i 1)) (& ^(seq-pat-helper var (+ i 1)) pat>))>))
 
 ;
 ; '|.' is a new pattern operator from Egison3.
 ; With this operator, we can write "seq-pat-helper' as bellow.
 ;
 
-(define $seq-pat-helper : ([VarName (Pattern $a) Integer] -> (Pattern a))
-  (lambda [$name $pat $i]
-    <cons ,(+ `name i) (|. (seq-pat-helper name (+ i 1)) pat)>))
+(define $seq-pat-helper : (\ [VarName (Pattern $a) Integer] (Pattern a))
+  (lambda [$var $pat $i]
+    <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
 
 
 ;;;
@@ -41,21 +41,30 @@
 ; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
 ; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
 ;
-(define $shuntsu : ([VarName (Pattern (Collection Integer))] -> (Pattern (Collection Integer)))
+(define $shuntsu : (\ [VarName (Pattern (Collection Integer))] (Pattern (Collection Integer)))
   (lambda [$s $pat]
     <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
 
-(define $test-pat : ([VarName Integer] -> (Pattern (Collection Integer)))
+; (shuntsu %n1 (shuntsu $n2 (shuntsu $n3 _)
+; {1 2 3 3 4 5 2 3 4}
+
+(define $test-pat : (\ [VarName Integer] (Pattern (Collection Integer)))
   (lambda [$s $n]
     ,(+ `s (+ 1 n))))
 
+<cons $m <cons ?(dividable $ m) _>>
+
+(define $test-pat
+  (lambda [$var]
+    <cons $`var <cons ?(dividable $ `var) _>>
+
 ; Evaluation for patterns has three phase.
 ; (test-pat %x 10)
-; 1. Create a value-pattern-closure.
+; 1. Create a value-pattern-closure or predicate pattern.
 ;    -> (ValuePatternClosure env (+ `%x (+ 1 n)))
-; 2. Expand `%var with the result in the middle of pattern matching
+; 2. Expand and evaluate `%var ahead with the result in the middle of pattern matching on the environment of pattern matching expression
 ;    -> (ValuePatternClosure env (+ 3 (+ 1 n)))
-; 3. Evaluate value-pattern-closure
+; 3. Evaluate value-pattern-closure or predicate closure.
 ;    -> 14
 
 patternMatch :: Environment -> [MatchState] -> IOThrowsError [MatchResult]
@@ -76,9 +85,9 @@ patternMatchCore env frame matcher pattern target =
     (ValuePattern env expr) ->
        
 evalValuePat env expr frame =
-evalValuePat env (OmitExpr name nums) frame =
-  case getValue env (name, nums) of
-    (VarName name nums) -> cEval (getValueFromFrame frame (name, nums))
+evalValuePat env (OmitExpr var nums) frame =
+  case getValue env (var, nums) of
+    (VarName var nums) -> cEval (getValueFromFrame frame (var, nums))
     _ -> throwError "..."
 evalValuePat env expr frame = do
   val <- eval1 env expr
