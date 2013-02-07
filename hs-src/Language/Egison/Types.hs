@@ -45,20 +45,20 @@ data EgisonExpr =
   | InductiveDataExpr String [EgisonExpr]
   | TupleExpr [EgisonExpr]
   | CollectionExpr [InnerExpr]
-  | FuncExpr EgisonExpr EgisonExpr
+  | LambdaExpr [String] EgisonExpr
 
   | IfExpr EgisonExpr EgisonExpr EgisonExpr
   | LetExpr Bindings EgisonExpr
   | LetRecExpr RecursiveBindings EgisonExpr
-  | DoExpr Bindings EgisonExpr
-
+    
   | MatchExpr EgisonExpr EgisonExpr [MatchClause]
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause
 
+  | Function EgisonExpr  [MatchClause]
+
   | MatcherExpr MatcherInfoExpr
   
-  | ClassExpr ClassInfoExpr
-  | InstanceExpr ClassInfoExpr
+  | DoExpr Bindings EgisonExpr
 
   | ApplyExpr EgisonExpr EgisonExpr
 
@@ -68,14 +68,13 @@ data EgisonExpr =
 
 data EgisonTypeExpr =
     CharTypeExpr
-  | StringTypeExpr
   | BoolTypeExpr
   | IntegerTypeExpr
   | FloatTypeExpr
   | VarNameTypeExpr
     -- Type variable binded to some type
   | VarTypeExpr String
-    -- _ -> _
+    -- (\ _  _)
   | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
     -- (Match _), (Pattern _)
   | MatcherTypeExpr EgisonTypeExpr
@@ -88,9 +87,10 @@ data EgisonTypeExpr =
  deriving (Show)
           
 data EgisonClassExpr =
+    -- `Type' which include all type classes.
     TypeClassExpr
+    -- Other type classes
   | VarClassExpr String
-  | FunClassExpr EgisonClassExpr EgisonClassExpr
         
 type MatchClause = (EgisonExpr, EgisonExpr)
 
@@ -100,14 +100,14 @@ data PrimitivePatPattern =
   | PPInductivePat String [PrimitivePatPattern]
  deriving (Show)
 
-data PrimitivePattern =
+data PrimitiveDataPattern =
     PWildCard
   | PPatVar String
-  | PInductivePat String [PrimitivePattern]
+  | PInductivePat String [PrimitiveDataPattern]
   | PEmptyPat
-  | PConsPat PrimitivePattern PrimitivePattern
-  | PSnocPat PrimitivePattern PrimitivePattern
-
+  | PConsPat PrimitiveDataPattern PrimitiveDataPattern
+  | PSnocPat PrimitiveDataPattern PrimitiveDataPattern
+  -- Are these really necessary?
   | PPatBool Bool
   | PPatChar Char
   | PPatInteger Integer
@@ -128,7 +128,7 @@ type Bindings = [(EgisonExpr, EgisonExpr)]
 
 type RecursiveBindings = [(String, EgisonExpr)]
   
-type MatcherInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitivePattern, EgisonExpr)])]
+type MatcherInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitiveDataPattern, EgisonExpr)])]
 
 type ClassInfoExpr = [(String, EgisonTypeExpr)]
 
@@ -138,14 +138,6 @@ type ClassInfoExpr = [(String, EgisonTypeExpr)]
 
 data EgisonTypedExpr =
  Hoge
- deriving (Show)
-
-data DefineTypeExpr =
-  Huga
- deriving (Show)
-
-data DefineClassExpr =
-  Piyo
  deriving (Show)
 
 data Environment =
@@ -231,7 +223,7 @@ data Action =
   | WriteToPort String String
  deriving (Show)
 
-type MatcherInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitivePattern, EgisonExpr)])]
+type MatcherInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitiveDataPattern, EgisonExpr)])]
 type ClassInfo = [(String, EgisonType)]
 
 --
