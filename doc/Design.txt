@@ -252,7 +252,7 @@
   (lambda [$x] (++ (show x) "\n")))
 
 (define-class $Multiset [$a]
-  {$multiset : (\ (Matcher ,a) (Matcher (Collection ,a)))})
+  {$multiset : (\ (Matcher a) (Matcher (Collection a)))})
 
 (class-instance Multiset _ :: Ord {[$multiset multiset-ord]})
 (class-instance Multiset _ :: Eq {[$multiset multiset-eq]})
@@ -262,6 +262,16 @@
 ;;;
 ;;; Matcher depends on Class
 ;;;
+
+;              
+; Subclassing sytstem enable to choose `multiset-ord' not `multiset-normal'
+; when the type class of the type of the argument is `Ord'.
+; e.g. Ord <:: Eq <:: Type
+; 
+; Egison has subtyping system too.
+; e.g. Nat <: Integer
+;
+
 (define $multiset-ord : (\ (Matcher $a :: Ord) (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher ...)))
@@ -274,17 +284,6 @@
   (lambda [$a]
     (matcher ...)))
 
-(define-kind $Multiset [$A]
-  {$multiset : (\ (Matcher $a :: ,A) (Matcher (Collection ,a)))})
-
-;              
-; Subclassing sytstem enable to choose `multiset-ord' not `multiset-normal'
-; when the type class of the type of the argument is `Ord'.
-; e.g. Ord <:: Eq <:: Type
-; 
-; Egison has subtyping system too.
-; e.g. Nat <: Integer
-;
 
 ;;;
 ;;; Partial evaluation
