@@ -12,8 +12,8 @@ import Text.ParserCombinators.Parsec hiding (spaces)
 --
 data EgisonTopExpr =
     Define String EgisonExpr
-  | DefineType String DefineTypeExpr
-  | DefineClass String DefineClassExpr
+  | DefineType String EgisonTypeExpr
+  | DefineClass String EgisonClassExpr
   | Instance String [String] [(String, String)]
   | Test EgisonExpr
   | Execute [String]
@@ -54,7 +54,7 @@ data EgisonExpr =
   | MatchExpr EgisonExpr EgisonExpr [MatchClause]
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause
 
-  | Function EgisonExpr  [MatchClause]
+  | FunctionExpr EgisonExpr  [MatchClause]
 
   | MatcherExpr MatcherInfoExpr
   
@@ -72,16 +72,22 @@ data EgisonTypeExpr =
   | IntegerTypeExpr
   | FloatTypeExpr
   | VarNameTypeExpr
-    -- Type variable binded to some type
-  | VarTypeExpr String
     -- (\ _  _)
   | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
     -- (Match _), (Pattern _)
   | MatcherTypeExpr EgisonTypeExpr
   | PatternTypeExpr EgisonTypeExpr
-    -- [_ _ ...], (Collection _)
+    -- <cons _ _ ...>, [_ _ ...], (Collection _), (| _ _ ...)
+  | InductiveTypeExpr String [EgisonTypeExpr]
   | TupleTypeExpr [EgisonTypeExpr]
   | CollectionTypeExpr EgisonTypeExpr
+  | OrTypeExpr [EgisonTypeExpr]
+    
+    -- Type variable binded to some type
+  | VarTypeExpr String
+    
+    -- `(lambda _ _)'
+  | TypeLambdaExpr [String] EgisonTypeExpr
     -- (FnType ArgType ...)
   | AppTypeExpr EgisonTypeExpr EgisonTypeExpr
  deriving (Show)
@@ -89,8 +95,16 @@ data EgisonTypeExpr =
 data EgisonClassExpr =
     -- `Type' which include all type classes.
     TypeClassExpr
+    
+    -- (class ...)
+  | ClassExpr [String] ClassInfoExpr
+    
+    -- (& _ _ ...), (| _ _ ...) 
+  | AndClassExpr
+  | OrClassExpr
     -- Other type classes
   | VarClassExpr String
+ deriving (Show)
         
 type MatchClause = (EgisonExpr, EgisonExpr)
 
