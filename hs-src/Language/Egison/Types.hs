@@ -36,11 +36,11 @@ data EgisonExpr =
 
   | WildCardExpr
   | ValuePatExpr EgisonExpr
+  | PredPatExpr EgisonExpr
   | CutPatExpr EgisonExpr
   | NotPatExpr EgisonExpr
   | AndPatExpr [EgisonExpr]
   | OrPatExpr [EgisonExpr]
-  | PredPatExpr EgisonExpr [EgisonExpr]
 
   | InductiveDataExpr String [EgisonExpr]
   | TupleExpr [EgisonExpr]
