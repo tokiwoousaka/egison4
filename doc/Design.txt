@@ -193,7 +193,7 @@
 ; We need to pass matcher to some function to indicate what matcher to use.
 ; This is because there are many muchers for one type.
 ;
-(define $remove : (\ (\ (Matcher $a) [(Collection ,a) ,a]) (Collection ,a))
+(define $remove : (\ (Matcher $a) (\ [(Collection ,a) ,a] (Collection ,a)))
   (lambda [$matcher]
     (lambda [$xs $x]
       (match xs (list matcher)
@@ -232,12 +232,12 @@
 
 (subclass Eq Ord)
 
-(class-instance Show Char {[$show show-char]})
-(class-instance Show Integer {[$show show-integer]})
-(class-instance Show String {[$show id]})
-(class-instance Show (Collection _ :: Show) {[$show show-list]})
+(instance Show Char {[$show show-char]})
+(instance Show Integer {[$show show-integer]})
+(instance Show String {[$show id]})
+(instance Show (Collection _ :: Show) {[$show show-list]})
 
-(class-instance Ord [Integer Integer]
+(instance Ord [Integer Integer]
   {[$compare compare-integer]
    [$lt? lt-i]
    [$gt? gt-i]
