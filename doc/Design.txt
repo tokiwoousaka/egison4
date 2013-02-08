@@ -114,8 +114,8 @@
        [<join ,$xs $> [(multiset a)]
         {[$tgt (letrec {[$looper (function [(multiset a) (multiset a)]
                                    {[[<nil> $tgt2] {[tgt2]}]
-                                     [[<cons $x $xs2> <cons ,x $tgt2>] (looper xs2 tgt2)]
-                                     [_ {}]})]}
+                                    [[<cons $x $xs2> <cons ,x $tgt2>] (looper xs2 tgt2)]
+                                    [_ {}]})]}
                  (looper xs tgt))]}]
        [$ [something]
         {[$tgt {tgt}]}]
@@ -374,21 +374,3 @@ Monad
 (recieve matcher
   {[...]
    ...})
-
-;;;
-;;; Vector
-;;;
-
-(define-type $Vector
-  (lambda [$n]
-    (type-lambda
-      ...)))
-
-(define $inner-prod :: (\ [((Vector $n) Integer) ((Vecor ,n) Integer)] Integer)
-  (lambda [$vec1 $vec2]
-    (match [vec1 vec2] [(vector n integer) (vector n integer)]
-      {[[<assoc ,i $x_i>
-         <assoc ,i $y_i>]
-        (foldr + 0 (zip2 x_@ y_@) (lambda [$x $y] (+ ret (* x y))]
-       })))
-
