@@ -52,7 +52,7 @@ parseMatchExpr :: Parser EgisonExpr
 parseMatchExpr = notImplemented
 
 parseInductiveDataExpr :: Parser EgisonExpr
-parseInductiveDataExpr = angles $ InductiveDataExpr <$> ident <*> exprs <*> pure Nothing
+parseInductiveDataExpr = angles $ InductiveDataExpr <$> ident <*> exprs
   where
     exprs = sepEndBy parseEgisonExpr whiteSpace
 
@@ -69,10 +69,9 @@ parseIfExpr :: Parser EgisonExpr
 parseIfExpr = IfExpr <$> (keywordIf   *> parseEgisonExpr)
                      <*> (keywordThen *> parseEgisonExpr)
                      <*> (keywordElse *> parseEgisonExpr)
-                     <*> pure Nothing
 
 parseLetRecExpr :: Parser EgisonExpr
-parseLetRecExpr =  keywordLetRec *> (LetRecExpr <$> parseRecursiveBindings <*> parseEgisonExpr <*> pure Nothing)
+parseLetRecExpr =  keywordLetRec *> (LetRecExpr <$> parseRecursiveBindings <*> parseEgisonExpr)
 
 parseLetExpr :: Parser EgisonExpr
 parseLetExpr = notImplemented
@@ -88,7 +87,7 @@ parseConstantExpr =  parseCharExpr
                      <|> parseFloatExpr
 
 parseCharExpr :: Parser EgisonExpr
-parseCharExpr = CharExpr <$> charLiteral <*> pure Nothing
+parseCharExpr = CharExpr <$> charLiteral
 
 parseStringExpr :: Parser EgisonExpr
 parseStringExpr = notImplemented
