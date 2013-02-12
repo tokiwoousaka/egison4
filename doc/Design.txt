@@ -245,7 +245,11 @@
 ; i.e. (\ $a :: Show String) is same with (\ ($a :: Show) String).
 ;
 (define $print : (\ $a :: Show String)
-  (lambda [$x] (++ (show x) "\n")))
+  (lambda [$x] {@(show x) '\n'}))
+
+(define-class $Multiset
+  (class [$a]
+    {$multiset : (\ (Matcher a) (Matcher (Collection a)))}))
 
 (define-class $Multiset
   (class [$a]
@@ -254,7 +258,7 @@
 (instance Multiset _ :: Ord {[$multiset multiset-ord]})
 (instance Multiset _ :: Eq {[$multiset multiset-eq]})
 (instance Multiset _ :: Type {[$multiset multiset-normal]})
-  
+
 
 ;;;
 ;;; Matcher depends on Class
