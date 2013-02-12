@@ -28,6 +28,26 @@
     <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
 
 
+(loop %l %i (between 1 n) <cons $a_i l> <nil>) <=> (n-pat %a (between 1 n) <nil>)
+
+(define $n-pat : (\ [VarName (Collection Integer) (Pattern $a)] (Pattern a))
+  (lambda [$var $range $pat]
+    (match range (list something)
+      {[<nil> pat]
+       [<cons $i $is> <cons `$var_i (n-pat var is pat)]})))
+
+(define $loop : (\ [VarName VarName (Collection Integer) (Pattern $a)] (Pattern a))
+  (lambda [$var $range $pat]
+    (match range (list something)
+      {[<nil> pat]
+       [<cons $i $is> <cons `$var_i (loop var is pat)]})))
+
+(define $loop : (\ [VarName VarName (Collection Integer) (Pattern $a)] (Pattern a))
+  (lambda [$loop-var $range $pat]
+    (match range (list something)
+      {[<nil> pat]
+       [<cons $`loop-var $range2>  (loop loop-var range2 pat)]})))
+
 ;;;
 ;;; Pattern matching mechanism
 ;;; -- First class patterns
