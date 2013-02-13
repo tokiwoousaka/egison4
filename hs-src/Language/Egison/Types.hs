@@ -11,7 +11,7 @@ import Text.ParserCombinators.Parsec hiding (spaces)
 -- Expressions
 --
 data EgisonTopExpr =
-    Define String EgisonExpr
+    Define Binding
   | DefineType String EgisonTypeExpr
   | DefineClass String EgisonClassExpr
   | Instance String [String] [(String, String)]
@@ -48,8 +48,8 @@ data EgisonExpr =
   | LambdaExpr [String] EgisonExpr
 
   | IfExpr EgisonExpr EgisonExpr EgisonExpr
-  | LetExpr Bindings EgisonExpr
-  | LetRecExpr RecursiveBindings EgisonExpr
+  | LetExpr [Binding] EgisonExpr
+  | LetRecExpr [Binding] EgisonExpr
     
   | MatchExpr EgisonExpr EgisonExpr [MatchClause]
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause
@@ -58,12 +58,14 @@ data EgisonExpr =
 
   | MatcherExpr MatcherInfoExpr
   
-  | DoExpr Bindings EgisonExpr
+  | DoExpr [Binding] EgisonExpr
 
   | ApplyExpr EgisonExpr EgisonExpr
 
   | SomethingExpr
   | UndefinedExpr
+    
+  | ContextExpr EgisonTypeExpr [EgisonClassExpr]
  deriving (Show)
 
 data EgisonTypeExpr =
@@ -74,7 +76,7 @@ data EgisonTypeExpr =
   | VarNameTypeExpr
     -- (\ _  _)
   | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
-    -- (Match _), (Pattern _)
+    -- (Matcher _), (Pattern _)
   | MatcherTypeExpr EgisonTypeExpr
   | PatternTypeExpr EgisonTypeExpr
     -- <cons _ _ ...>, [_ _ ...], (Collection _), (| _ _ ...)
@@ -90,6 +92,8 @@ data EgisonTypeExpr =
   | TypeLambdaExpr [String] EgisonTypeExpr
     -- (FnType ArgType ...)
   | AppTypeExpr EgisonTypeExpr EgisonTypeExpr
+    
+  | TypeContextExpr EgisonTypeExpr [EgisonClassExpr]
  deriving (Show)
           
 data EgisonClassExpr =
@@ -99,9 +103,6 @@ data EgisonClassExpr =
     -- (class ...)
   | ClassExpr [String] ClassInfoExpr
     
-    -- (& _ _ ...), (| _ _ ...) 
-  | AndClassExpr
-  | OrClassExpr
     -- Other type classes
   | VarClassExpr String
  deriving (Show)
@@ -138,10 +139,8 @@ data InnerTypedExpr =
   | SubCollectionTypedExpr EgisonTypedExpr
  deriving (Show)
 
-type Bindings = [(EgisonExpr, EgisonExpr)]
+type Binding = (EgisonExpr, EgisonExpr)
 
-type RecursiveBindings = [(String, EgisonExpr)]
-  
 type MatcherInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitiveDataPattern, EgisonExpr)])]
 
 type ClassInfoExpr = [(String, EgisonTypeExpr)]
