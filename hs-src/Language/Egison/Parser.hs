@@ -19,37 +19,46 @@ parseEgisonTopExpr = parens $  parseDefineExpr
                                 <|> parseLoadExpr
 
 parseDefineExpr :: Parser EgisonTopExpr
-parseDefineExpr = keywordDefine *> (Define <$> ident <*> parseEgisonExpr)
+parseDefineExpr = keywordDefine >> Define <$> ident <*> parseEgisonExpr
 
 parseTestExpr :: Parser EgisonTopExpr
-parseTestExpr = keywordTest *> (Test <$> parseEgisonExpr)
+parseTestExpr = keywordTest >> Test <$> parseEgisonExpr
 
 parseExecuteExpr :: Parser EgisonTopExpr
-parseExecuteExpr = keywordExecute *> (Execute <$> sepEndBy stringLiteral whiteSpace)
+parseExecuteExpr = keywordExecute >> Execute <$> sepEndBy stringLiteral whiteSpace
 
 parseLoadFileExpr :: Parser EgisonTopExpr
-parseLoadFileExpr = keywordLoadFile *> (LoadFile <$> stringLiteral)
+parseLoadFileExpr = keywordLoadFile >> LoadFile <$> stringLiteral
 
 parseLoadExpr :: Parser EgisonTopExpr
-parseLoadExpr = keywordLoad *> (Load <$> stringLiteral)
+parseLoadExpr = keywordLoad >> Load <$> stringLiteral
 
 parseEgisonExpr :: Parser EgisonExpr
-parseEgisonExpr = parseInductiveDataExpr
+parseEgisonExpr = parseMatchAllExpr
+                  <|> parseMatchExpr
+                  <|> parseInductiveDataExpr
                   <|> parseTupleExpr
                   <|> parseCollectionExpr
-                  <|> parseFuncExpr
+                  <|> parseFunctionExpr
                   <|> parseIfExpr
+                  <|> parseLambdaExpr
                   <|> parseLetRecExpr
                   <|> parseLetExpr
+                  <|> parseApplyExpr
                   <|> parsePatternExpr
                   <|> parseConstantExpr
-                  
 
 parseMatchAllExpr :: Parser EgisonExpr
-parseMatchAllExpr = notImplemented
+parseMatchAllExpr = keywordMatchAll >> MatchAllExpr <$> parseEgisonExpr <*> parseEgisonExpr <*> parseMatchClause
 
 parseMatchExpr :: Parser EgisonExpr
-parseMatchExpr = notImplemented
+parseMatchExpr = keywordMatch >> MatchExpr <$> parseEgisonExpr <*> parseEgisonExpr <*> parseMatchClauses
+
+parseMatchClauses :: Parser [MatchClause]
+parseMatchClauses = sepEndBy parseMatchClause whiteSpace
+
+parseMatchClause :: Parser MatchClause
+parseMatchClause = brackets $ (,) <$> parseEgisonExpr <*> parseEgisonExpr
 
 parseInductiveDataExpr :: Parser EgisonExpr
 parseInductiveDataExpr = angles $ InductiveDataExpr <$> ident <*> exprs
@@ -57,27 +66,69 @@ parseInductiveDataExpr = angles $ InductiveDataExpr <$> ident <*> exprs
     exprs = sepEndBy parseEgisonExpr whiteSpace
 
 parseTupleExpr :: Parser EgisonExpr
-parseTupleExpr = notImplemented
+parseTupleExpr = brackets $ TupleExpr <$> sepEndBy parseEgisonExpr whiteSpace
 
 parseCollectionExpr :: Parser EgisonExpr
-parseCollectionExpr = notImplemented
-
-parseFuncExpr :: Parser EgisonExpr
-parseFuncExpr = notImplemented
+parseCollectionExpr = braces $ CollectionExpr <$> sepEndBy parseInnerExpr whiteSpace
+  where
+    parseInnerExpr :: Parser InnerExpr
+    parseInnerExpr = (char '@' >> SubCollectionExpr <$> parseEgisonExpr)
+                     <|> ElementExpr <$> parseEgisonExpr
+parseFunctionExpr :: Parser EgisonExpr
+parseFunctionExpr = keywordFunction >> FunctionExpr <$> parseEgisonExpr <*> parseMatchClauses
 
 parseIfExpr :: Parser EgisonExpr
 parseIfExpr = IfExpr <$> (keywordIf   *> parseEgisonExpr)
                      <*> (keywordThen *> parseEgisonExpr)
                      <*> (keywordElse *> parseEgisonExpr)
 
+parseLambdaExpr :: Parser EgisonExpr
+parseLambdaExpr = keywordLambda >> LambdaExpr <$> parseParams <*> parseEgisonExpr
+
+parseParams :: Parser [String]
+parseParams = brackets $ sepEndBy parseName whiteSpace
+
 parseLetRecExpr :: Parser EgisonExpr
-parseLetRecExpr =  keywordLetRec *> (LetRecExpr <$> parseRecursiveBindings <*> parseEgisonExpr)
+parseLetRecExpr =  keywordLetRec >> LetRecExpr <$> parseRecursiveBindings <*> parseEgisonExpr
 
 parseLetExpr :: Parser EgisonExpr
-parseLetExpr = notImplemented
+parseLetExpr = keywordLet >> LetExpr <$> parseBindings <*> parseEgisonExpr
+
+parseApplyExpr :: Parser EgisonExpr
+parseApplyExpr = parens $ ApplyExpr <$> parseEgisonExpr <*> parseEgisonExpr
+
+parseDoExpr :: Parser EgisonExpr
+parseDoExpr = keywordDo >> DoExpr <$> parseBindings <*> parseEgisonExpr
+
+parseBindings :: Parser Bindings
+parseBindings = braces (sepEndBy (brackets $ (,) <$> parseEgisonExpr <*> parseEgisonExpr) whiteSpace)
+
+parseRecursiveBindings :: Parser RecursiveBindings
+parseRecursiveBindings = braces (sepEndBy (brackets $ (,) <$> parseName <*> parseEgisonExpr) whiteSpace)
+
+parseVar :: Parser EgisonExpr
+parseVar = VarExpr <$> ident <*> parseIndexNums
+
+parseIndexNums :: Parser [EgisonExpr]
+parseIndexNums = (char '_' >> (:) <$> ident <*> parseIndexNums)
+                 <|> pure []
 
 parsePatternExpr :: Parser EgisonExpr
-parsePatternExpr = notImplemented
+parsePatternExpr =  notImplemented
+
+parseCutPat :: Parser EgisonExpr
+parseCutPat = char '!' >> CutPatExpr <$> parseEgisonExpr
+
+parseNotPat :: Parser EgisonExpr
+parseNotPat = char '^' >> NotPatExpr <$> parseEgisonExpr
+
+parseWildCard :: Parser EgisonExpr
+parseWildCard = char '_' >> WildCardExpr <$> parseEgisonExpr
+
+parseValuePat :: Parser EgisonExpr
+parseValuePat = char ',' >> ValuePatExpr <$> parseEgisonExpr
+
+
 
 parseConstantExpr :: Parser EgisonExpr
 parseConstantExpr =  parseCharExpr
@@ -85,6 +136,8 @@ parseConstantExpr =  parseCharExpr
                      <|> parseBoolExpr
                      <|> parseIntegerExpr
                      <|> parseFloatExpr
+                     <|> (keywordSomething *> pure SomethingExpr)
+                     <|> (keywordUndefined *> pure UndefinedExpr)
 
 parseCharExpr :: Parser EgisonExpr
 parseCharExpr = CharExpr <$> charLiteral
@@ -93,18 +146,13 @@ parseStringExpr :: Parser EgisonExpr
 parseStringExpr = notImplemented
 
 parseBoolExpr :: Parser EgisonExpr
-parseBoolExpr = notImplemented
+parseBoolExpr = char '#' >> BoolExpr <$> (char 't' *> pure True <|> char 'f' *> pure False)
 
 parseIntegerExpr :: Parser EgisonExpr
-parseIntegerExpr = notImplemented
+parseIntegerExpr = IntegerExpr <$> integerLiteral
 
 parseFloatExpr :: Parser EgisonExpr
-parseFloatExpr = notImplemented
-
-parseRecursiveBindings :: Parser RecursiveBindings
-parseRecursiveBindings = braces $ sepEndBy binding whiteSpace
-  where
-    binding = brackets $ (\x y -> (x, y)) <$> parseName <*> parseEgisonExpr
+parseFloatExpr = FloatExpr <$> floatLiteral
 
 parseName :: Parser String
 parseName = char '$' >> ident
@@ -125,10 +173,15 @@ reservedKeywords =
   , "if"
   , "then"
   , "else" 
+  , "lambda"
   , "letrec"
   , "let"
   , "match-all"
-  , "match"]
+  , "match"
+  , "do"
+  , "function"
+  , "something"
+  , "undefined"]
   
 reservedOperators :: [String]
 reservedOperators = []
@@ -137,10 +190,12 @@ reserved = P.reserved lexer
 keywordDefine     = reserved "define"
 keywordDefineTyp  = reserved "define-type"
 keywordDefineCls  = reserved "define-class"
+keywordInstance   = reserved "instance"
 keywordTest       = reserved "test"
 keywordExecute    = reserved "execute"
 keywordLoadFile   = reserved "load-file"
 keywordLoad       = reserved "load"
+keywordLambda     = reserved "lambda"
 keywordLetRec     = reserved "letrec"
 keywordLet        = reserved "let"
 keywordIf         = reserved "if"
@@ -148,7 +203,16 @@ keywordThen       = reserved "then"
 keywordElse       = reserved "else"
 keywordMatchAll   = reserved "match-all"
 keywordMatch      = reserved "match"
+keywordDo         = reserved "do"
+keywordFunction   = reserved "function"
+keywordSomething  = reserved "something"
+keywordUndefined  = reserved "undefiend"
 
+integerLiteral :: Parser Integer
+integerLiteral = P.integer lexer
+
+floatLiteral :: Parser Double
+floatLiteral = P.float lexer
 
 stringLiteral :: Parser String
 stringLiteral = P.stringLiteral lexer

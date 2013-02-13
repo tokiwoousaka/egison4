@@ -54,7 +54,7 @@ data EgisonExpr =
   | MatchExpr EgisonExpr EgisonExpr [MatchClause]
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause
 
-  | FunctionExpr EgisonExpr  [MatchClause]
+  | FunctionExpr EgisonExpr [MatchClause]
 
   | MatcherExpr MatcherInfoExpr
   
