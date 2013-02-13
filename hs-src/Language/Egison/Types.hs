@@ -30,6 +30,7 @@ data EgisonExpr =
   | FloatExpr Double
   | PatVarExpr String [EgisonExpr]
   | VarExpr String [EgisonExpr]
+  | SymExpr String
   | VarNameExpr String
   | PatVarOmitExpr String [EgisonExpr]
   | OmitExpr String [EgisonExpr]
@@ -61,6 +62,7 @@ data EgisonExpr =
   | DoExpr [Binding] EgisonExpr
     
   | ApplyExpr EgisonExpr EgisonExpr
+
 
   | SomethingExpr
   | UndefinedExpr

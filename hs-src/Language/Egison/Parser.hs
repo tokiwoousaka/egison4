@@ -13,11 +13,12 @@ import qualified Text.Parsec.Token as P
 import Language.Egison.Types
 
 parseEgisonTopExpr :: Parser EgisonTopExpr
-parseEgisonTopExpr = parens $  parseDefineExpr
-                                <|> parseTestExpr
-                                <|> parseExecuteExpr
-                                <|> parseLoadFileExpr
-                                <|> parseLoadExpr
+parseEgisonTopExpr = parens (parseDefineExpr
+                             <|> parseTestExpr
+                             <|> parseExecuteExpr
+                             <|> parseLoadFileExpr
+                             <|> parseLoadExpr
+                             <?> "TopLevel Expression")
 
 parseDefineExpr :: Parser EgisonTopExpr
 parseDefineExpr = keywordDefine >> Define <$> parseBinding <*> parseEgisonExpr
@@ -41,13 +42,16 @@ parseEgisonExpr = parseMatchAllExpr
                   <|> parseTupleExpr
                   <|> parseCollectionExpr
                   <|> parseFunctionExpr
+                  <|> parseSym
+                  <|> parseVar
+                  <|> parsePatternExpr                  
+                  <|> parseConstantExpr                  
                   <|> parseIfExpr
                   <|> parseLambdaExpr
                   <|> parseLetRecExpr
                   <|> parseLetExpr
                   <|> parseApplyExpr
-                  <|> parsePatternExpr
-                  <|> parseConstantExpr
+                  <?> "Expression"
 
 parseMatchAllExpr :: Parser EgisonExpr
 parseMatchAllExpr = keywordMatchAll >> MatchAllExpr <$> parseEgisonExpr <*> parseEgisonExpr <*> parseMatchClause
@@ -84,7 +88,9 @@ parseIfExpr = IfExpr <$> (keywordIf   *> parseEgisonExpr)
                      <*> (keywordElse *> parseEgisonExpr)
 
 parseLambdaExpr :: Parser EgisonExpr
-parseLambdaExpr = keywordLambda >> LambdaExpr <$> parseParams <*> parseEgisonExpr
+parseLambdaExpr = try . parens $  keywordLambda 
+                                   >> LambdaExpr <$> parseParams 
+                                                 <*> parseEgisonExpr
 
 parseParams :: Parser [String]
 parseParams = brackets $ sepEndBy parseName whiteSpace
@@ -109,6 +115,9 @@ parseBinding = brackets $ (,) <$> parseEgisonExpr <*> parseEgisonExpr
 
 parseVar :: Parser EgisonExpr
 parseVar = VarExpr <$> ident <*> parseIndexNums
+
+parseSym :: Parser EgisonExpr
+parseSym = SymExpr <$> parseName
 
 parseIndexNums :: Parser [EgisonExpr]
 parseIndexNums = (char '_' >> ((:) <$> parseEgisonExpr <*> parseIndexNums))
