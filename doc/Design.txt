@@ -15,7 +15,7 @@
 ; `:' operator is left-associative.
 ;    
 (define $add : (\ [Integer Integer] Intger)
-  (lambda [$x $y] (+ x y)))
+  (lambda [$x : Integer $y] (+ x y : Integer) : Integer))
 
 ;
 ; Data which defines how to pattern-match is called `matcher'.
@@ -272,8 +272,8 @@
 ; Egison has subtyping system too.
 ; e.g. Nat <: Integer
 ;
-
-(define $multiset-ord : (\ (Matcher $a :: Ord) (Matcher (Collection ,a)))
+[1] <=> 1 <=> [[1]]
+(define $multiset-ord : (\ (Matcher $a :: [Ord Show]) (Matcher (Collection ,a)))
   (lambda [$a]
     (matcher ...)))
 
