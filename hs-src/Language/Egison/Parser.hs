@@ -3,6 +3,7 @@ import Control.Monad.Identity
 import Control.Monad.Error
 import Control.Applicative ((<$>), (<*>), (*>), (<*), pure)
 import Data.ByteString.Lazy(ByteString)
+import Data.ByteString.Lazy.Char8
 import Text.Parsec
 import Text.Parsec.ByteString.Lazy
 import Text.Parsec.Char
@@ -19,7 +20,7 @@ parseEgisonTopExpr = parens $  parseDefineExpr
                                 <|> parseLoadExpr
 
 parseDefineExpr :: Parser EgisonTopExpr
-parseDefineExpr = keywordDefine >> Define <$> ident <*> parseEgisonExpr
+parseDefineExpr = keywordDefine >> Define <$> parseBinding <*> parseEgisonExpr
 
 parseTestExpr :: Parser EgisonTopExpr
 parseTestExpr = keywordTest >> Test <$> parseEgisonExpr
@@ -36,7 +37,7 @@ parseLoadExpr = keywordLoad >> Load <$> stringLiteral
 parseEgisonExpr :: Parser EgisonExpr
 parseEgisonExpr = parseMatchAllExpr
                   <|> parseMatchExpr
-                  <|> parseInductiveDataExpr
+                  <|> parseInductiveExpr
                   <|> parseTupleExpr
                   <|> parseCollectionExpr
                   <|> parseFunctionExpr
@@ -60,8 +61,8 @@ parseMatchClauses = sepEndBy parseMatchClause whiteSpace
 parseMatchClause :: Parser MatchClause
 parseMatchClause = brackets $ (,) <$> parseEgisonExpr <*> parseEgisonExpr
 
-parseInductiveDataExpr :: Parser EgisonExpr
-parseInductiveDataExpr = angles $ InductiveDataExpr <$> ident <*> exprs
+parseInductiveExpr :: Parser EgisonExpr
+parseInductiveExpr = angles $ InductiveDataExpr <$> ident <*> exprs
   where
     exprs = sepEndBy parseEgisonExpr whiteSpace
 
@@ -89,7 +90,7 @@ parseParams :: Parser [String]
 parseParams = brackets $ sepEndBy parseName whiteSpace
 
 parseLetRecExpr :: Parser EgisonExpr
-parseLetRecExpr =  keywordLetRec >> LetRecExpr <$> parseRecursiveBindings <*> parseEgisonExpr
+parseLetRecExpr =  keywordLetRec >> LetRecExpr <$> parseBindings <*> parseEgisonExpr
 
 parseLetExpr :: Parser EgisonExpr
 parseLetExpr = keywordLet >> LetExpr <$> parseBindings <*> parseEgisonExpr
@@ -100,35 +101,49 @@ parseApplyExpr = parens $ ApplyExpr <$> parseEgisonExpr <*> parseEgisonExpr
 parseDoExpr :: Parser EgisonExpr
 parseDoExpr = keywordDo >> DoExpr <$> parseBindings <*> parseEgisonExpr
 
-parseBindings :: Parser Bindings
-parseBindings = braces (sepEndBy (brackets $ (,) <$> parseEgisonExpr <*> parseEgisonExpr) whiteSpace)
+parseBindings :: Parser [Binding]
+parseBindings = braces $ sepEndBy parseBinding  whiteSpace
 
-parseRecursiveBindings :: Parser RecursiveBindings
-parseRecursiveBindings = braces (sepEndBy (brackets $ (,) <$> parseName <*> parseEgisonExpr) whiteSpace)
+parseBinding :: Parser Binding
+parseBinding = brackets $ (,) <$> parseEgisonExpr <*> parseEgisonExpr
 
 parseVar :: Parser EgisonExpr
 parseVar = VarExpr <$> ident <*> parseIndexNums
 
 parseIndexNums :: Parser [EgisonExpr]
-parseIndexNums = (char '_' >> (:) <$> ident <*> parseIndexNums)
+parseIndexNums = (char '_' >> ((:) <$> parseEgisonExpr <*> parseIndexNums))
                  <|> pure []
 
 parsePatternExpr :: Parser EgisonExpr
-parsePatternExpr =  notImplemented
+parsePatternExpr = parseWildCardExpr
+                   <|> parseCutPatExpr
+                   <|> parseNotPatExpr
+                   <|> parseValuePatExpr
+                   <|> parens (parsePredPatExpr <|> parseAndPatExpr <|> parseOrPatExpr)
 
-parseCutPat :: Parser EgisonExpr
-parseCutPat = char '!' >> CutPatExpr <$> parseEgisonExpr
+parseCutPatExpr :: Parser EgisonExpr
+parseCutPatExpr = char '!' >> CutPatExpr <$> parseEgisonExpr
 
-parseNotPat :: Parser EgisonExpr
-parseNotPat = char '^' >> NotPatExpr <$> parseEgisonExpr
+parseNotPatExpr :: Parser EgisonExpr
+parseNotPatExpr = char '^' >> NotPatExpr <$> parseEgisonExpr
 
-parseWildCard :: Parser EgisonExpr
-parseWildCard = char '_' >> WildCardExpr <$> parseEgisonExpr
+parseWildCardExpr :: Parser EgisonExpr
+parseWildCardExpr = char '_' >> pure WildCardExpr
 
-parseValuePat :: Parser EgisonExpr
-parseValuePat = char ',' >> ValuePatExpr <$> parseEgisonExpr
+parseValuePatExpr :: Parser EgisonExpr
+parseValuePatExpr = char ',' >> ValuePatExpr <$> parseEgisonExpr
 
+parsePatVarExpr :: Parser EgisonExpr
+parsePatVarExpr = PatVarExpr <$> parseName <*> parseIndexNums
 
+parsePredPatExpr :: Parser EgisonExpr
+parsePredPatExpr = char '?' >> PredPatExpr <$> parseEgisonExpr
+
+parseAndPatExpr :: Parser EgisonExpr
+parseAndPatExpr = char '&' >> AndPatExpr <$> sepEndBy parseEgisonExpr whiteSpace
+
+parseOrPatExpr :: Parser EgisonExpr
+parseOrPatExpr = char '|' >> OrPatExpr <$> sepEndBy parseEgisonExpr whiteSpace
 
 parseConstantExpr :: Parser EgisonExpr
 parseConstantExpr =  parseCharExpr
@@ -139,14 +154,20 @@ parseConstantExpr =  parseCharExpr
                      <|> (keywordSomething *> pure SomethingExpr)
                      <|> (keywordUndefined *> pure UndefinedExpr)
 
+parseVarOmitPatExpr :: Parser EgisonExpr
+parseVarOmitPatExpr = char '`' >> OmitExpr <$> ident <*> parseIndexNums
+
+parsePatVarOmitExpr :: Parser EgisonExpr
+parsePatVarOmitExpr = string "$`" >> PatVarOmitExpr <$> ident <*> parseIndexNums
+
 parseCharExpr :: Parser EgisonExpr
 parseCharExpr = CharExpr <$> charLiteral
 
 parseStringExpr :: Parser EgisonExpr
-parseStringExpr = notImplemented
+parseStringExpr = StringExpr <$> stringLiteral
 
 parseBoolExpr :: Parser EgisonExpr
-parseBoolExpr = char '#' >> BoolExpr <$> (char 't' *> pure True <|> char 'f' *> pure False)
+parseBoolExpr = BoolExpr <$> boolLiteral
 
 parseIntegerExpr :: Parser EgisonExpr
 parseIntegerExpr = IntegerExpr <$> integerLiteral
@@ -219,6 +240,9 @@ stringLiteral = P.stringLiteral lexer
 
 charLiteral :: Parser Char
 charLiteral = P.charLiteral lexer
+
+boolLiteral :: Parser Bool
+boolLiteral = char '#' >> (char 't' *> pure True <|> char 'f' *> pure False)
 
 whiteSpace :: Parser ()
 whiteSpace = P.whiteSpace lexer

@@ -11,7 +11,7 @@ import Text.ParserCombinators.Parsec hiding (spaces)
 -- Expressions
 --
 data EgisonTopExpr =
-    Define Binding
+    Define Binding EgisonExpr
   | DefineType String EgisonTypeExpr
   | DefineClass String EgisonClassExpr
   | Instance String [String] [(String, String)]
@@ -59,7 +59,7 @@ data EgisonExpr =
   | MatcherExpr MatcherInfoExpr
   
   | DoExpr [Binding] EgisonExpr
-
+    
   | ApplyExpr EgisonExpr EgisonExpr
 
   | SomethingExpr
@@ -148,6 +148,7 @@ type ClassInfoExpr = [(String, EgisonTypeExpr)]
 --
 -- Typed Expression
 --
+
 
 data EgisonTypedExpr =
  Hoge
