@@ -12,8 +12,8 @@ import Text.ParserCombinators.Parsec hiding (spaces)
 --
 data EgisonTopExpr =
     Define Binding
-  | DefineType String EgisonTypeExpr
-  | DefineClass String EgisonClassExpr
+  | DefineType String EgisonType
+  | DefineClass String EgisonClass
   | Instance String [String] [(String, String)]
   | Test EgisonExpr
   | Execute [String]
@@ -65,47 +65,58 @@ data EgisonExpr =
   | SomethingExpr
   | UndefinedExpr
     
-  | ContextExpr EgisonTypeExpr [EgisonClassExpr]
+  | ContextExpr EgisonType [EgisonClass]
  deriving (Show)
 
-data EgisonTypeExpr =
-    CharTypeExpr
-  | BoolTypeExpr
-  | IntegerTypeExpr
-  | FloatTypeExpr
-  | VarNameTypeExpr
-    -- (\ _  _)
-  | FunTypeExpr EgisonTypeExpr EgisonTypeExpr
+data EgisonType =
+    CharType
+  | BoolType
+  | IntegerType
+  | FloatType
+    
+    -- @ Types for variable names
+  | VarNameType EgisonType
+    
+    -- @ Functional types
+    -- Example)
+    --   (\ Integer Bool) -> FunType IntegerType BoolType
+  | FunType EgisonType EgisonType
+
     -- (Matcher _), (Pattern _)
-  | MatcherTypeExpr EgisonTypeExpr
-  | PatternTypeExpr EgisonTypeExpr
-    -- <cons _ _ ...>, [_ _ ...], (Collection _), (| _ _ ...)
-  | InductiveTypeExpr String [EgisonTypeExpr]
-  | TupleTypeExpr [EgisonTypeExpr]
-  | CollectionTypeExpr EgisonTypeExpr
-  | OrTypeExpr [EgisonTypeExpr]
+  | MatcherType EgisonType
+  | PatternType EgisonType
     
-    -- Type variable binded to some type
-  | VarTypeExpr String
+    -- @ Type constructors for user-defined types
+    -- Example)
+    --   Nat          -> TypeCons "Nat" []
+    --   Tree Integer -> TypeCons "Tree" [IntegerType]
+  | TypeCons String [EgisonType]
     
-    -- `(lambda _ _)'
-  | TypeLambdaExpr [String] EgisonTypeExpr
-    -- (FnType ArgType ...)
-  | AppTypeExpr EgisonTypeExpr EgisonTypeExpr
+    -- @ Tuples of types
+  | TupleType [EgisonType]
     
-  | TypeContextExpr EgisonTypeExpr [EgisonClassExpr]
+    -- @ Types for collections
+  | CollectionType EgisonType
+    
+    -- @ Type variable binded to some type
+  | VarType String
+    
+    -- @ Types with contexts
+    -- Example)
+    --   ($a :: Show ,a) -> TypeContext (PatVarType "a") [ClassContext "Show" [VarType "a"]]
+  | TypeContext EgisonType [EgisonContext]
  deriving (Show)
           
-data EgisonClassExpr =
-    -- `Type' which include all type classes.
-    TypeClassExpr
-    
-    -- (class ...)
-  | ClassExpr [String] ClassInfoExpr
-    
-    -- Other type classes
-  | VarClassExpr String
- deriving (Show)
+data EgisonContext = 
+  -- @ Contexts defined by a class predicate
+  ClassContext String       -- Names of classes
+               [EgisonExpr] -- Type parameters
+               deriving (Show)
+
+data EgisonClass =
+  -- @ Type classes of egison
+  Class [String] ClassInfoExpr
+                 deriving (Show)
         
 type MatchClause = (EgisonExpr, EgisonExpr)
 
@@ -143,7 +154,7 @@ type Binding = (EgisonExpr, EgisonExpr)
 
 type MatcherInfoExpr = [(PrimitivePatPattern, EgisonExpr, [(PrimitiveDataPattern, EgisonExpr)])]
 
-type ClassInfoExpr = [(String, EgisonTypeExpr)]
+type ClassInfoExpr = [(String, EgisonType)]
 
 --
 -- Typed Expression
@@ -168,25 +179,6 @@ data Object =
   | Intermidiate EgisonIntermidiate
   | Value EgisonValue
   
-data EgisonType =
-    CharType
-  | StringType
-  | BoolType
-  | IntegerType
-  | FloatType
-  | TypeType
-  | ClassType
-  | PatternType EgisonType
-
-  | TupleType [EgisonType]
-  | CollectionType EgisonType
-  | FunType EgisonType EgisonType
-  | AppType EgisonType EgisonType
-
-  | PatVarType String
-  | VarType String
- deriving (Show)
-        
 data EgisonPattern =
     WildCard
   | PatVar String [Integer]
@@ -215,7 +207,6 @@ data EgisonValue =
   | Tuple [EgisonValue]
   | Collection [EgisonValue]
   | Matcher MatcherInfo
-  | Class ClassInfo
   | Func ObjectRef EgisonExpr Env
   | PrimitiveFunc ([EgisonValue] -> ThrowsError EgisonValue)
   | IOFunc ([EgisonValue] -> IOThrowsError EgisonValue)
@@ -237,7 +228,6 @@ data Action =
  deriving (Show)
 
 type MatcherInfo = [(PrimitivePatPattern, ObjectRef, [(Env, PrimitiveDataPattern, EgisonExpr)])]
-type ClassInfo = [(String, EgisonType)]
 
 --
 -- Internal Data
@@ -280,14 +270,12 @@ data EgisonError =
   | TypeMismatch EgisonExpr EgisonType
   | NotImplemented String
   | Default String
-
-showError :: EgisonError -> String
-showError (Parser parseErr) = "Parse error at " ++ ": " ++ show parseErr
-showError (TypeMismatch expr typ) = "Type error: The type of a expression '" ++ show expr ++ "' is expected to be '" ++ show typ ++ "'"
-showError (NotImplemented message) = "Not implemented: " ++ message
-showError (Default message) = "Error: " ++ message
-
-instance Show EgisonError where show = showError
+    
+instance Show EgisonError where
+  show (Parser parseErr) = "Parse error at " ++ ": " ++ show parseErr
+  show (TypeMismatch expr typ) = "Type error: The type of a expression '" ++ show expr ++ "' is expected to be '" ++ show typ ++ "'"
+  show (NotImplemented message) = "Not implemented: " ++ message
+  show (Default message) = "Error: " ++ message
 instance Error EgisonError where
   noMsg = Default "An error has occurred"
   strMsg = Default
@@ -299,7 +287,7 @@ trapError action = catchError action (return . show)
 
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
-extractValue (Left _) = error "Unexpected error in extractValue; "
+extractValue (Left err) = error $ "Unexpected error(" ++ show err ++ ") in extractValue; "
 
 type IOThrowsError = ErrorT EgisonError IO
 

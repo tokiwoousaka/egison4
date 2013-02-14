@@ -1,0 +1,12 @@
+{-# Language TypeSynonymInstances, FlexibleInstances #-}
+module Typing where
+
+-- I will deprecate this synonym
+-- type EgisonType = EgisonTypeExpr
+
+type TypeVariable = String
+data TypeConstructor = TCons String -- Name
+                             Int    -- Arity
+type ClassName = String
+
+type TypeContext = [(ClassName, TypeVariable)]
