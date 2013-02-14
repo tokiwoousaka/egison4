@@ -67,7 +67,7 @@ data EgisonExpr =
   | SomethingExpr
   | UndefinedExpr
     
-  | ContextExpr EgisonTypeExpr [EgisonClassExpr]
+  | EgisonTypedExpr EgisonExpr EgisonTypeExpr
  deriving (Show)
 
 data EgisonTypeExpr =
