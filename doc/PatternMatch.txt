@@ -16,14 +16,15 @@
 ; Only varialbes in value patterns should be able to refer to the result of the processing of the pattern matching.
 ; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
 ;
-(define $shuntsu : (\ [VarName (Pattern (Collection Integer))] (Pattern (Collection Integer)))
+(define $shuntsu : (\ [(VarName Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
   (lambda [$s $pat]
     <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
 
-; (shuntsu %n1 (shuntsu $n2 (shuntsu $n3 _)
+; (shuntsu %n1 (shuntsu %n2 (shuntsu %n3 _)))
+; => <cons $n1 <cons ,(+ n1 1) <cons ,(+ n1 2) pat>>>))
 ; {1 2 3 3 4 5 2 3 4}
 
-(define $test-pat : (\ [VarName Integer] (Pattern (Collection Integer)))
+(define $test-pat : (\ [(VarName Integer) Integer] (Pattern (Collection Integer)))
   (lambda [$s $n]
     ,(+ `s (+ 1 n))))
 
