@@ -239,7 +239,7 @@
 ; `:' and `::' operators are left-associative.
 ; i.e. (\ $a :: Show String) is equivalent to (\ ($a :: Show) String).
 ;
-(define $print : (\ $a :: Show String)
+(define $print : (\ ($a :: Show) String)
   (lambda [$x] {@(show x) '\n'}))
 
 (define-class ($Multiset $a)
@@ -304,23 +304,13 @@
 ;; pattern function
 ;;
 
-(define $seq-pat : (\ [(VarName Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
+(define $seq-pat : (\ [VarName (Pattern (Collection Integer))] (Pattern (Collection Integer)))
   (lambda [$var $pat]
     (seq-pat-helper var pat 1)))
 
-(define $seq-pat-helper : (\ [(VarName Integer) (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
+(define $seq-pat-helper : (\ [VarName (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
   (lambda [$var $pat $i]
-    <cons ,(+ `var i) (| (seq-pat-helper var (+ i 1)) (& ^(seq-pat-helper var (+ i 1)) pat>))>))
-
-;
-; '|.' is a new pattern operator from Egison3.
-; With this operator, we can write "seq-pat-helper' as bellow.
-;
-
-(define $seq-pat-helper : (\ [(VarName Integer) (Pattern $a) Integer] (Pattern a))
-  (lambda [$var $pat $i]
-    <cons ,(+ `var i) (|. (seq-pat-helper var (+ i 1)) pat)>))
-
+    <cons ,(+ `var i) (| (seq-pat-helper var (+ i 1)) pat)))
 
 (loop %l %i (between 1 n) <cons $a_i l> <nil>) <=> (n-pat %a (between 1 n) <nil>)
 
@@ -415,3 +405,16 @@ Monad
 (recieve matcher
   {[...]
    ...})
+
+;;;
+;;; 型の目的
+;;;
+
+コンパイラの最適化に使う
+ad-hoc polymorphism
+型情報をプログラムから分離したい
+
+ユーザの自明な間違いを排除する
+
+`Tree' 
+()

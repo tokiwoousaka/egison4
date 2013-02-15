@@ -30,6 +30,7 @@ data EgisonExpr =
   | FloatExpr Double
   | PatVarExpr String [EgisonExpr]
   | VarExpr String [EgisonExpr]
+  | SymExpr String
   | VarNameExpr String
   | PatVarOmitExpr String [EgisonExpr]
   | OmitExpr String [EgisonExpr]
@@ -54,13 +55,14 @@ data EgisonExpr =
   | MatchExpr EgisonExpr EgisonExpr [MatchClause]
   | MatchAllExpr EgisonExpr EgisonExpr MatchClause
 
-  | FunctionExpr EgisonExpr  [MatchClause]
+  | FunctionExpr EgisonExpr [MatchClause]
 
   | MatcherExpr MatcherInfoExpr
   
   | DoExpr [Binding] EgisonExpr
-
+    
   | ApplyExpr EgisonExpr EgisonExpr
+
 
   | SomethingExpr
   | UndefinedExpr
@@ -159,6 +161,7 @@ type ClassInfoExpr = [(String, EgisonType)]
 --
 -- Typed Expression
 --
+
 
 data EgisonTypedExpr =
  Hoge
