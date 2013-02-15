@@ -1,5 +1,5 @@
 ;;;;;
-;;;;; Design of Egison3
+;;;;; Design of Egison4
 ;;;;;
 
 ;;;

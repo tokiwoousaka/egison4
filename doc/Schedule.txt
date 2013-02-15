@@ -8,7 +8,7 @@ Schedule
 
 - 2013.2
 
-Design Egison Version 3 Interpreter
+Design Egison Version 4 Interpreter
 Implement parser
 Start implementation of Type inference
 
@@ -24,5 +24,5 @@ Implement Core Libraries
 
 2013.5
 
-Test Egison Version 3 Interpreter
-Release Egison Version 3 Interpreter
+Test Egison Version 4 Interpreter
+Release Egison Version 4 Interpreter
