@@ -304,34 +304,47 @@
 ;; pattern function
 ;;
 
-(define $seq-pat : (\ [VarName (Pattern (Collection Integer))] (Pattern (Collection Integer)))
-  (lambda [$var $pat]
-    (seq-pat-helper var pat 1)))
+(define $seq-pat : (\ [(PatVar Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
+  (lambda [$pvar $pat]
+    <cons pvar (seq-pat-helper pvar pat 1)>))
 
-(define $seq-pat-helper : (\ [VarName (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
-  (lambda [$var $pat $i]
-    <cons ,(+ `var i) (| (seq-pat-helper var (+ i 1)) pat)))
+(define $seq-pat-helper : (\ [(PatVar Integer) (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
+  (lambda [$pvar $pat $i]
+    <cons ,(+ `pvar i) (| (seq-pat-helper pvar (+ i 1)) pat)))
 
-(loop %l %i (between 1 n) <cons $a_i l> <nil>) <=> (n-pat %a (between 1 n) <nil>)
+;
+; Mah-jong example
+;
 
-(define $n-pat : (\ [VarName (Collection Integer) (Pattern $a)] (Pattern a))
-  (lambda [$var $range $pat]
-    (match range (list something)
-      {[<nil> pat]
-       [<cons $i $is> <cons `$var_i (n-pat var is pat)]})))
+(define $shuntsu : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
+  (lambda [$pvar $pat]
+    <cons (& <num $s $n> pvar)
+     <cons <num ,s ,(+ `n 1)>
+      <cons <num ,s ,(+ `n 2)>
+       pat>>>))
+        
+(define $kohtsu : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
+  (lambda [$pvar $pat]
+    <cons pvar
+     <cons ,`pvar
+      <cons ,`pvar
+       pat>>>))
 
-(define $loop : (\ [VarName VarName (Collection Integer) (Pattern $a)] (Pattern a))
-  (lambda [$var $range $pat]
-    (match range (list something)
-      {[<nil> pat]
-       [<cons $i $is> <cons `$var_i (loop var is pat)]})))
+(define $head : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
+  (lambda [$pvar $pat]
+    <cons pvar
+     <cons ,`pvar
+       pat>>))
 
-(define $loop : (\ [VarName VarName (Collection Integer) (Pattern $a)] (Pattern a))
-  (lambda [$loop-var $range $pat]
-    (match range (list something)
-      {[<nil> pat]
-       [<cons $`loop-var $range2>  (loop loop-var range2 pat)]})))
-
+(define $yaku? : (\ (Collection Hai) Bool)
+  (function (multiset hai)
+    {[(head $head (| (shuntsu $h1 (shuntsu $h2 (shuntsu $h3 <nil>)))
+                     (shuntsu $h1 (shuntsu $h2 (kohtsu $h3 <nil>)))
+                     (shuntsu $h1 (kohtsu $h2 (kohtsu $h3 <nil>)))
+                     (kohtsu $h1 (kohtsu $h2 (kohtsu $h3 <nil>)))))
+      #t]
+     [_
+      #f]}))
 
 ;;
 ;; IO
