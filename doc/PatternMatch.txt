@@ -16,31 +16,26 @@
 ; Only varialbes in value patterns and predicate patterns should be able to refer to the result of the processing of the pattern matching.
 ; (I don't think patterns like `<cons $fn (fn 10)>' is useful)
 ;
-; "Pattern" is a primitive-pattern-constructor introdueced with Egison3 as "Matcher".
+; "Pattern" is a primitive-pattern-constructor introdueced with Egison4 as "Matcher".
 ;
-(define $shuntsu : (\ [(VarName Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
-  (lambda [$s $pat]
-    <cons $`s <cons ,(+ `s 1) <cons ,(+ `s 2) pat>>>))
 
+(define $test-pat : (\ [(PatVar Integer) Integer] (Pattern Integer))
+  (lambda [$pvar $n]
+    ,(+ `pvar (+ 1 n))))
 
-; (shuntsu %n _)
-; => <cons $n <cons ,(+ n 1) <cons ,(+ n 2) _>>>
-; {1 2 3 3 4 5 2 3 4}
+;
+; ``' omit `$' of the following pattern variable.
+; `pvar' could be also writtern as `$`pvar'.
+;
 
-(define $test-pat : (\ [(VarName Integer) Integer] (Pattern Integer))
-  (lambda [$s $n]
-    ,(+ `s (+ 1 n))))
-
-<cons $m <cons ?(dividable $ m) _>>
-
-(define $test-pat2 : (\ [(VarName Integer) Integer] (Pattern (Collection Integer)))
-  (lambda [$var]
-    <cons $`var <cons ?(dividable $ `var) _>>
+(define $test-pat2 : (\ [(PatVar Integer) Integer] (Pattern (Collection Integer)))
+  (lambda [$pvar]
+    <cons pvar <cons ?(dividable $ `pvar) _>>
 
 ; Evaluation for patterns has three phases.
-; (test-pat %x 10)
+; (test-pat $x 10)
 ; 1. Create a value-pattern-closure or predicate pattern.
-;    -> (ValuePatternClosure env (+ `%x (+ 1 n)))
+;    -> (ValuePatternClosure env (+ `$x (+ 1 n)))
 ; 2. Expand and evaluate `%var ahead with the result in the middle of pattern matching on the environment of pattern matching expression
 ;    -> (ValuePatternClosure env (+ 3 (+ 1 n)))
 ; 3. Evaluate value-pattern-closure or predicate closure.
