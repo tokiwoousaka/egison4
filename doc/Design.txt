@@ -334,7 +334,7 @@
   (lambda [$pvar $pat]
     <cons pvar
      <cons ,`pvar
-       pat>>))
+      pat>>))
 
 (define $yaku? : (\ (Collection Hai) Bool)
   (function (multiset hai)
