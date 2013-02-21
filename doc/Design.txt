@@ -316,32 +316,37 @@
 ; Mah-jong example
 ;
 
+;
+; Mah-jong example
+;
+ 
 (define $shuntsu : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
   (lambda [$pvar $pat]
-    <cons (& <num $s $n> pvar)
-     <cons <num ,s ,(+ `n 1)>
-      <cons <num ,s ,(+ `n 2)>
+    <cons (& <num $s $n> $`pvar)
+     <cons <num ,s ,(+ n 1)>
+      <cons <num ,s ,(+ n 2)>
        pat>>>))
         
 (define $kohtsu : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
   (lambda [$pvar $pat]
-    <cons pvar
+    <cons $`pvar
      <cons ,`pvar
       <cons ,`pvar
        pat>>>))
-
+ 
 (define $twin : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
   (lambda [$pvar $pat]
-    <cons pvar
+    <cons $`pvar
      <cons ,`pvar
       pat>>))
-
+ 
 (define $yaku? : (\ (Collection Hai) Bool)
   (function (multiset hai)
-    {[(twin $th_1 (| (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 <nil>)))
-                     (shuntsu $sh_1 (shuntsu $sh_2 (kohtsu $kh_1 <nil>)))
-                     (shuntsu $sh_1 (kohtsu $kh_1 (kohtsu $kh_2 <nil>)))
-                     (kohtsu $kh_1 (kohtsu $kh_2 (kohtsu $kh_3 <nil>)))
+    {[(twin $th_1 (| (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 (shuntsu $sh_4 <nil>))))
+                     (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 (kohtsu $kh_1 <nil>))))
+                     (shuntsu $sh_1 (shuntsu $sh_2 (kohtsu $kh_1 (kohtsu $kh_2 <nil>))))
+                     (shuntsu $sh_1 (kohtsu $kh_1 (kohtsu $kh_2 (kohtsu $kh_3 <nil>))))
+                     (kohtsu $kh_1 (kohtsu $kh_2 (kohtsu $kh_3 (kohtsu $kh_4 <nil>))))
                      (twin $th_2 (twin $th_3 (twin $th_4 (twin $th_5 (twin $th_6 (twin $th_7 <nil>))))))
                      ))
       #t]
