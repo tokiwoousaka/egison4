@@ -304,13 +304,13 @@
 ;; pattern function
 ;;
 
-(define $seq-pat : (\ [(PatVar Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
-  (lambda [$pvar $pat]
-    <cons pvar (seq-pat-helper pvar pat 1)>))
+(define $seq-pat : (\ [(Pattern Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
+  (lambda [$pat1 $pat2]
+    <cons (& $n pat1) (seq-pat-helper n pat2 1)>))
 
-(define $seq-pat-helper : (\ [(PatVar Integer) (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
-  (lambda [$pvar $pat $i]
-    <cons ,(+ `pvar i) (| (seq-pat-helper pvar (+ i 1)) pat)))
+(define $seq-pat-helper : (\ [Integer (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
+  (lambda [$n $pat2 $i]
+    <cons ,(+ n i) (| (seq-pat-helper n (+ i 1)) pat2)))
 
 ;
 ; Mah-jong example
