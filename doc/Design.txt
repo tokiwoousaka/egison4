@@ -340,7 +340,7 @@
      <cons ,pat
       pat2>>))
  
-(define $yaku? : (\ (Collection Hai) Bool)
+(define $agari? : (\ (Collection Hai) Bool)
   (function (multiset hai)
     {[(twin $th_1 (| (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 (shuntsu $sh_4 <nil>))))
                      (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 (kohtsu $kh_1 <nil>))))
