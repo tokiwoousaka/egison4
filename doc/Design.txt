@@ -320,25 +320,25 @@
 ; Mah-jong example
 ;
  
-(define $shuntsu : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
-  (lambda [$pvar $pat]
-    <cons (& <num $s $n> $`pvar)
+(define $shuntsu : (\ [(Pattern Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
+  (lambda [$pat1 $pat2]
+    <cons (& <num $s $n> pat1)
      <cons <num ,s ,(+ n 1)>
       <cons <num ,s ,(+ n 2)>
-       pat>>>))
+       pat2>>>))
         
-(define $kohtsu : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
-  (lambda [$pvar $pat]
-    <cons $`pvar
-     <cons ,`pvar
-      <cons ,`pvar
-       pat>>>))
+(define $kohtsu : (\ [(Pattern Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
+  (lambda [$pat1 $pat2]
+    <cons (& $pat pat1)
+     <cons ,pat
+      <cons ,pat
+       pat2>>>))
  
-(define $twin : (\ [(PatVar Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
-  (lambda [$pvar $pat]
-    <cons $`pvar
-     <cons ,`pvar
-      pat>>))
+(define $twin : (\ [(Pattern Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
+  (lambda [$pat1 $pat2]
+    <cons (& $pat pat1)
+     <cons ,pat
+      pat2>>))
  
 (define $yaku? : (\ (Collection Hai) Bool)
   (function (multiset hai)
