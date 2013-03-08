@@ -3,6 +3,16 @@
 ;;;;;
 
 ;;;
+;;; Data constructors
+;;;
+
+<Node <Leaf 1> <Node <Leaf 2> <Leaf 3>>>
+
+(define $ThreeCons
+  (data-constructor [$x $xs]
+    <Cons x <Cons x <Cons x xs>>>))
+
+;;;
 ;;; Type system
 ;;;
 
@@ -305,12 +315,12 @@
 ;;
 
 (define $seq-pat : (\ [(Pattern Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
-  (lambda [$pat1 $pat2]
+  (pattern-constructor [$pat1 $pat2]
     <cons (& $n pat1) (seq-pat-helper n pat2 1)>))
 
 (define $seq-pat-helper : (\ [Integer (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
-  (lambda [$n $pat2 $i]
-    <cons ,(+ n i) (| (seq-pat-helper n (+ i 1)) pat2)))
+  (pattern-constructor [$n $pat2 $i]
+    <cons ,(+ n i) (| <seq-pat-helper n (+ i 1)> pat2)))
 
 ;
 ; Mah-jong example
@@ -321,34 +331,34 @@
 ;
  
 (define $shuntsu : (\ [(Pattern Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
-  (lambda [$pat1 $pat2]
+  (pattern-constructor [$pat1 $pat2]
     <cons (& <num $s $n> pat1)
      <cons <num ,s ,(+ n 1)>
       <cons <num ,s ,(+ n 2)>
        pat2>>>))
         
 (define $kohtsu : (\ [(Pattern Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
-  (lambda [$pat1 $pat2]
+  (pattern-constructor [$pat1 $pat2]
     <cons (& $pat pat1)
      <cons ,pat
       <cons ,pat
        pat2>>>))
  
 (define $twin : (\ [(Pattern Hai) (Pattern (Collection Hai))] (Pattern (Collection Hai)))
-  (lambda [$pat1 $pat2]
+  (pattern-constructor [$pat1 $pat2]
     <cons (& $pat pat1)
      <cons ,pat
       pat2>>))
  
 (define $agari? : (\ (Collection Hai) Bool)
   (function (multiset hai)
-    {[(twin $th_1 (| (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 (shuntsu $sh_4 <nil>))))
-                     (shuntsu $sh_1 (shuntsu $sh_2 (shuntsu $sh_3 (kohtsu $kh_1 <nil>))))
-                     (shuntsu $sh_1 (shuntsu $sh_2 (kohtsu $kh_1 (kohtsu $kh_2 <nil>))))
-                     (shuntsu $sh_1 (kohtsu $kh_1 (kohtsu $kh_2 (kohtsu $kh_3 <nil>))))
-                     (kohtsu $kh_1 (kohtsu $kh_2 (kohtsu $kh_3 (kohtsu $kh_4 <nil>))))
-                     (twin $th_2 (twin $th_3 (twin $th_4 (twin $th_5 (twin $th_6 (twin $th_7 <nil>))))))
-                     ))
+    {[<twin $th_1 (| <shuntsu $sh_1 <shuntsu $sh_2 <shuntsu $sh_3 <shuntsu $sh_4 <nil>>>>>
+                     <shuntsu $sh_1 <shuntsu $sh_2 <shuntsu $sh_3 <kohtsu $kh_1 <nil>>>>>
+                     <shuntsu $sh_1 <shuntsu $sh_2 <kohtsu $kh_1 <kohtsu $kh_2 <nil>>>>>
+                     <shuntsu $sh_1 <kohtsu $kh_1 <kohtsu $kh_2 <kohtsu $kh_3 <nil>>>>>
+                     <kohtsu $kh_1 <kohtsu $kh_2 <kohtsu $kh_3 <kohtsu $kh_4 <nil>>>>>
+                     <twin $th_2 <twin $th_3 <twin $th_4 <twin $th_5 <twin $th_6 <twin $th_7 <nil>>>>>>>
+                     )>
       #t]
      [_
       #f]}))
