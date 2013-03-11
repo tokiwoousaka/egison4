@@ -12,6 +12,13 @@
   (data-constructor [$x $xs]
     <Cons x <Cons x <Cons x xs>>>))
 
+
+;
+; allow tuple only for outermost patterns
+;
+(match-all [1 2 3] [Integer Integer Integer]
+  [[$n ,(+ n 1) ,(+ n 2)] n])
+
 ;;;
 ;;; Type system
 ;;;
