@@ -316,11 +316,12 @@
 
 (define $seq-pat : (\ [(Pattern Integer) (Pattern (Collection Integer))] (Pattern (Collection Integer)))
   (pattern-constructor [$pat1 $pat2]
-    <cons (& $n pat1) (seq-pat-helper n pat2 1)>))
+    <cons (& $n pat1) <(seq-pat-helper n 1) pat2>>))
 
-(define $seq-pat-helper : (\ [Integer (Pattern (Collection Integer)) Integer] (Pattern (Collection Integer)))
-  (pattern-constructor [$n $pat2 $i]
-    <cons ,(+ n i) (| <seq-pat-helper n (+ i 1)> pat2)))
+(define $seq-pat-helper : (\ [Integer Integer] (\ (Pattern (Collection Integer)) (Pattern (Collection Integer))))
+  (lambda [$n $i]
+    (pattern-constructor [$pat2]
+      <cons ,(+ n i) (| <(seq-pat-helper n (+ i 1)) pat2> pat2)>)))
 
 (define $empty (pattern-constructor [] <nil>))
 
